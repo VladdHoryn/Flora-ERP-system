@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.inventoryService.domain.PlantType;
 
 import java.time.LocalDate;
 
@@ -16,11 +17,19 @@ public class PlantBatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    PlantType plantType;
+    String plantsName;
     String location;
     LocalDate plantedAt;
     int totalCount;
 
-    public PlantBatch(String location, LocalDate plantedAt, int totalCount) {
+    public PlantBatch(PlantType plantType, String plantsName, String location, LocalDate plantedAt, int totalCount) {
+        if (plantType == null) {
+            throw new IllegalArgumentException("Plant type cannot be null");
+        }
+        if (plantsName == null || plantsName.isBlank()) {
+            throw new IllegalArgumentException("Plant name cannot be null or blank");
+        }
         if (location == null || location.isBlank())
             throw new IllegalArgumentException("Location cannot be null or blank");
 
@@ -30,6 +39,8 @@ public class PlantBatch {
         if (totalCount < 0)
             throw new IllegalArgumentException("Total count cannot be negative");
 
+        this.plantsName = plantsName;
+        this.plantType = plantType;
         this.location = location;
         this.plantedAt = plantedAt;
         this.totalCount = totalCount;

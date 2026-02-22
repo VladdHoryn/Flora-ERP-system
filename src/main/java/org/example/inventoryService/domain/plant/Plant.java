@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.inventoryService.domain.PlantType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -15,13 +16,27 @@ public abstract class Plant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long batchId;
+
+    @Enumerated(EnumType.STRING)
+    private PlantType plantType;
+
+    String name;
     @Embedded
     HealthStatus healthStatus;
     @Embedded
     GrowthStage growthStage;
 
-    protected Plant(Long batchId){
+    protected Plant(Long batchId, String name, PlantType plantType){
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Plant name cannot be null or blank");
+        }
+        if (plantType == null) {
+            throw new IllegalArgumentException("Plant type cannot be null");
+        }
+
         this.batchId = batchId;
+        this.name = name;
+        this.plantType = plantType;
         this.healthStatus = new HealthStatus();
         this.growthStage = new GrowthStage();
     }

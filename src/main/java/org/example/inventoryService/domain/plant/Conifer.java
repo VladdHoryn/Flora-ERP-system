@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.inventoryService.domain.PlantType;
 
 @Entity
 @DiscriminatorValue("CONIFER")
@@ -13,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class Conifer extends Plant{
     private String plantDescription;
     private String propagationType;
-    private String grownIn;
 
     private double heightAtTenYears;        // in meters
     private String needleColor;
@@ -27,9 +27,10 @@ public class Conifer extends Plant{
     private String lightRequirements;
 
     public Conifer(Long batchId,
+                   String name,
+                   PlantType plantType,
                    String plantDescription,
                    String propagationType,
-                   String grownIn,
                    double heightAtTenYears,
                    String needleColor,
                    String crownShape,
@@ -38,10 +39,9 @@ public class Conifer extends Plant{
                    String soilRequirements,
                    String frostResistance,
                    String lightRequirements){
-        super(batchId);
+        super(batchId, name, plantType);
         this.plantDescription = plantDescription;
         this.propagationType = propagationType;
-        this.grownIn = grownIn;
         this.heightAtTenYears = heightAtTenYears;
         this.needleColor = needleColor;
         this.crownShape = crownShape;
