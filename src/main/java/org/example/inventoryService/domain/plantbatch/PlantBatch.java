@@ -20,11 +20,35 @@ public class PlantBatch {
     LocalDate plantedAt;
     int totalCount;
 
-    public PlantBatch(String location,
-                      LocalDate plantedAt,
-                      int totalCount){
+    public PlantBatch(String location, LocalDate plantedAt, int totalCount) {
+        if (location == null || location.isBlank())
+            throw new IllegalArgumentException("Location cannot be null or blank");
+
+        if (plantedAt == null)
+            throw new IllegalArgumentException("Planted date cannot be null");
+
+        if (totalCount < 0)
+            throw new IllegalArgumentException("Total count cannot be negative");
+
         this.location = location;
         this.plantedAt = plantedAt;
-        this.totalCount = 0;
+        this.totalCount = totalCount;
+    }
+
+    public void incrementTotalCount(int delta) {
+        if (delta <= 0)
+            throw new IllegalArgumentException("Delta must be positive");
+
+        this.totalCount += delta;
+    }
+
+    public void decrementTotalCount(int delta) {
+        if (delta <= 0)
+            throw new IllegalArgumentException("Delta must be positive");
+
+        if (delta > this.totalCount)
+            throw new IllegalArgumentException("Cannot remove more than total count");
+
+        this.totalCount -= delta;
     }
 }
