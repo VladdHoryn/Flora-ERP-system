@@ -9,7 +9,4 @@ import java.util.List;
 
 @Repository
 public interface PlantBatchRepository extends JpaRepository<PlantBatch, Long> {
-    public List<PlantBatch> findByLocation(String location);
-
-    public List<PlantBatch> findByPlantationDate(LocalDate plantedAt);
 }

@@ -7,7 +7,7 @@ import org.example.domain.PlantType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "plant_type")
+@DiscriminatorColumn(name = "dtype")
 @Getter
 @NoArgsConstructor
 public abstract class Plant {
@@ -17,6 +17,7 @@ public abstract class Plant {
     private long batchId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "plant_type")
     private PlantType plantType;
 
     String name;

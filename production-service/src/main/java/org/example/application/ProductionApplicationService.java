@@ -1,5 +1,6 @@
 package org.example.application;
 
+import lombok.AllArgsConstructor;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import org.example.repository.PlantRepository;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ProductionApplicationService {
     private final PlantRepository plantRepository;
     private final PlantBatchRepository plantBatchRepository;
