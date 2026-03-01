@@ -1,9 +1,8 @@
 package controller;
 
-import application.InventoryApplicationService;
+import application.ProductionApplicationService;
 import domain.plant.Plant;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,17 +10,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/inventory/v1")
 @RequiredArgsConstructor
-public class InventoryController {
+public class ProductionController {
 
-    private final InventoryApplicationService inventoryApplicationService;
+    private final ProductionApplicationService productionApplicationService;
 
     @GetMapping("/plants")
     public List<Plant> getPlants(){
-        return inventoryApplicationService.getAllPlants();
+        return productionApplicationService.getAllPlants();
     }
 
     @PostMapping("/plants")
     public Plant createPlant(@RequestBody Plant plant){
-        return inventoryApplicationService.createPlant(plant);
+        return productionApplicationService.createPlant(plant);
     }
 }

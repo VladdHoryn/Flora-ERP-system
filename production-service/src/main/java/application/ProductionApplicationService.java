@@ -11,7 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InventoryApplicationService {
+public class ProductionApplicationService {
     private final PlantRepository plantRepository;
     private final PlantBatchRepository plantBatchRepository;
 
