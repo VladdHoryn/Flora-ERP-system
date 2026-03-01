@@ -1,4 +1,4 @@
-package org.example.inventoryService.domain;
+package domain;
 
 public enum PlantType {
 

@@ -1,4 +1,4 @@
-package org.example.inventoryService.domain.plant;
+package domain.plant;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class Treatment {
-    private String description;
+public class Disease {
+    private String name;
 }

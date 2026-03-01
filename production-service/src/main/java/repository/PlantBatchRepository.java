@@ -1,6 +1,6 @@
-package org.example.inventoryService.repository;
+package repository;
 
-import org.example.inventoryService.domain.plantbatch.PlantBatch;
+import domain.plantbatch.PlantBatch;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

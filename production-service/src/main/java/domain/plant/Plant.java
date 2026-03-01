@@ -1,10 +1,11 @@
-package org.example.inventoryService.domain.plant;
+package domain.plant;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.inventoryService.domain.PlantType;
+import domain.PlantType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -72,5 +73,13 @@ public abstract class Plant {
 
     public boolean isHealthy() {
         return healthStatus.isHealthy();
+    }
+
+    public void copy(Plant plant){
+        this.batchId = plant.batchId;
+        this.plantType = plant.plantType;
+        this.name = plant.name;
+        this.healthStatus = plant.healthStatus;
+        this.growthStage = plant.growthStage;
     }
 }
