@@ -1,6 +1,6 @@
-package repository;
+package org.example.repository;
 
-import domain.plant.Plant;
+import org.example.domain.plant.Plant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

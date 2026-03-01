@@ -1,7 +1,7 @@
-package controller;
+package org.example.controller;
 
-import application.ProductionApplicationService;
-import domain.plant.Plant;
+import org.example.application.ProductionApplicationService;
+import org.example.domain.plant.Plant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,11 +1,11 @@
-package application;
+package org.example.application;
 
-import domain.plant.Plant;
-import domain.plantbatch.PlantBatch;
+import org.example.domain.plant.Plant;
+import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import repository.PlantBatchRepository;
-import repository.PlantRepository;
+import org.example.repository.PlantBatchRepository;
+import org.example.repository.PlantRepository;
 
 import java.util.List;
 

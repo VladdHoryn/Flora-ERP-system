@@ -1,11 +1,9 @@
-package domain.plant;
+package org.example.domain.plant;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import domain.PlantType;
+import org.example.domain.PlantType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
