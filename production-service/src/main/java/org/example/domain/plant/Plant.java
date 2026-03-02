@@ -1,10 +1,21 @@
 package org.example.domain.plant;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.domain.PlantType;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "dtype"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Conifer.class, name = "CONIFER"),
+        @JsonSubTypes.Type(value = FruitTree.class, name = "FRUITTREE")
+})
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")

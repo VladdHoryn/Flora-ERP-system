@@ -19,6 +19,7 @@ public class HealthStatus {
     private List<Treatment> treatments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "`condition`")
     private Condition condition;
 
     public void addDisease(Disease disease) {
