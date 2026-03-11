@@ -46,4 +46,17 @@ public class ProductionApplicationService {
     public PlantBatch createPlantBatch(PlantBatch plantBatch){
         return plantBatchRepository.save(plantBatch);
     }
+
+    public Integer findPlantsAmountInBatch(Long batchId){
+        return plantRepository.findAllByBatchId(batchId).size();
+    }
+
+    public PlantBatch updateTotalCountForBatch(Long batchId){
+        PlantBatch plantBatch = plantBatchRepository.findById(batchId).orElseThrow(
+                () -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
+
+        plantBatch.setTotalCount(findPlantsAmountInBatch(batchId));
+
+        return plantBatch;
+    }
 }
