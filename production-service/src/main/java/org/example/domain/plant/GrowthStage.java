@@ -1,4 +1,4 @@
-package org.example.inventoryService.domain.plant;
+package org.example.domain.plant;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;

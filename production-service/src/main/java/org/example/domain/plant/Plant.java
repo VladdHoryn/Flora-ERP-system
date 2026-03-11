@@ -1,13 +1,24 @@
-package org.example.inventoryService.domain.plant;
+package org.example.domain.plant;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.PlantType;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "dtype"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Conifer.class, name = "CONIFER"),
+        @JsonSubTypes.Type(value = FruitTree.class, name = "FRUITTREE")
+})
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "plant_type")
+@DiscriminatorColumn(name = "dtype")
 @Getter
 @NoArgsConstructor
 public abstract class Plant {
@@ -15,13 +26,28 @@ public abstract class Plant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long batchId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "plant_type")
+    private PlantType plantType;
+
+    String name;
     @Embedded
     HealthStatus healthStatus;
     @Embedded
     GrowthStage growthStage;
 
-    protected Plant(Long batchId){
+    protected Plant(Long batchId, String name, PlantType plantType){
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Plant name cannot be null or blank");
+        }
+        if (plantType == null) {
+            throw new IllegalArgumentException("Plant type cannot be null");
+        }
+
         this.batchId = batchId;
+        this.name = name;
+        this.plantType = plantType;
         this.healthStatus = new HealthStatus();
         this.growthStage = new GrowthStage();
     }
@@ -57,5 +83,13 @@ public abstract class Plant {
 
     public boolean isHealthy() {
         return healthStatus.isHealthy();
+    }
+
+    public void copy(Plant plant){
+        this.batchId = plant.batchId;
+        this.plantType = plant.plantType;
+        this.name = plant.name;
+        this.healthStatus = plant.healthStatus;
+        this.growthStage = plant.growthStage;
     }
 }

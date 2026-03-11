@@ -1,9 +1,7 @@
-package org.example.inventoryService.domain.plant;
+package org.example.domain.plant;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +19,7 @@ public class HealthStatus {
     private List<Treatment> treatments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "`condition`")
     private Condition condition;
 
     public void addDisease(Disease disease) {

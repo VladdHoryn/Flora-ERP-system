@@ -1,9 +1,10 @@
-package org.example.inventoryService.domain.plant;
+package org.example.domain.plant;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.PlantType;
 
 @Entity
 @DiscriminatorValue("FRUITTREE")
@@ -13,7 +14,6 @@ public class FruitTree extends Plant {
     private String plantDescription;
     private double fruitWeight;            // in grams
     private String propagationType;
-    private String grownIn;
 
     private double heightAtMaturity;       // in meters
     private String ripeningPeriod;         // e.g., early, mid, late
@@ -29,10 +29,11 @@ public class FruitTree extends Plant {
     private String recommendedPollinators;
 
     public FruitTree(Long batchId,
+                     String name,
+                     PlantType plantType,
                      String plantDescription,
                      double fruitWeight,
                      String propagationType,
-                     String grownIn,
                      double heightAtMaturity,
                      String ripeningPeriod,
                      String varietyAdvantages,
@@ -43,11 +44,10 @@ public class FruitTree extends Plant {
                      String frostResistance,
                      String lightRequirements,
                      String recommendedPollinators){
-        super(batchId);
+        super(batchId, name, plantType);
         this.plantDescription = plantDescription;
         this.fruitWeight = fruitWeight;
         this.propagationType = propagationType;
-        this.grownIn = grownIn;
         this.heightAtMaturity = heightAtMaturity;
         this.ripeningPeriod = ripeningPeriod;
         this.varietyAdvantages = varietyAdvantages;
