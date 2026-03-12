@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +21,12 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
+
+    public Reservation(){
+        status = ReservationStatus.CREATED;
+        createdAt = LocalDateTime.now();
+        expiresAt = LocalDateTime.now().plusHours(1);
+    }
 
     public void confirm(){
         status = ReservationStatus.CONFIRMED;

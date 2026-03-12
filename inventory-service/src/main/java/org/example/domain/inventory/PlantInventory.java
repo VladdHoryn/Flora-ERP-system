@@ -27,7 +27,7 @@ public class PlantInventory {
     private Long reservedQuantity;
     private Long availableQuantity;
 
-    PlantInventory(PlantType plantType, String plantsName, Long age){
+    public PlantInventory(PlantType plantType, String plantsName, Long age){
         this.plantType = plantType;
         this.plantsName = plantsName;
         this.age = age;
@@ -35,7 +35,7 @@ public class PlantInventory {
         this.reservedQuantity = 0L;
         this.availableQuantity = 0L;
     }
-    PlantInventory(PlantType plantType, String plantsName, Long age,
+    public PlantInventory(PlantType plantType, String plantsName, Long age,
                    Long totalQuantity, Long reservedQuantity){
         this.plantType = plantType;
         this.plantsName = plantsName;
@@ -45,12 +45,13 @@ public class PlantInventory {
         this.availableQuantity = totalQuantity - reservedQuantity;
     }
 
-    void increaseStock(Long count){
+    public void increaseStock(Long count){
         this.totalQuantity = totalQuantity + count;
 
         this.availableQuantity = totalQuantity - reservedQuantity;
     }
-    void decreaseStock(Long count){
+
+    public void decreaseStock(Long count){
         if(this.totalQuantity < count)
             throw new RuntimeException("Not enough plants to decrease");
         if(this.totalQuantity - this.reservedQuantity < count)
@@ -59,14 +60,15 @@ public class PlantInventory {
 
         this.availableQuantity = this.totalQuantity - this.reservedQuantity;
     }
-    void reserve(Long count){
+    public void reserve(Long count){
         if(this.availableQuantity < count)
             throw new RuntimeException("Not enough plants to reserve");
         this.reservedQuantity += count;
 
         this.availableQuantity = totalQuantity - reservedQuantity;
     }
-    void releaseReservation(Long count){
+
+    public void releaseReservation(Long count){
         if(this.reservedQuantity < count)
             throw new RuntimeException("Not enough plants to release reservation for");
         this.reservedQuantity -= count;
