@@ -24,12 +24,25 @@ public class PlantAvailability {
         status = PlantStatus.RESERVED;
     }
 
-    public void cancel(){
-        reservationId = null;
-        status = PlantStatus.AVAILABLE;
-    }
     public void reserve(Long reservationId){
+        if (status != PlantStatus.AVAILABLE) {
+            throw new IllegalStateException("Plant is not available");
+        }
+
         this.reservationId = reservationId;
-        status = PlantStatus.RESERVED;
+        this.status = PlantStatus.RESERVED;
+    }
+
+    public void release() {
+        if (status != PlantStatus.RESERVED) {
+            throw new IllegalStateException("Plant is not reserved");
+        }
+
+        this.reservationId = null;
+        this.status = PlantStatus.AVAILABLE;
+    }
+
+    public boolean isAvailable() {
+        return status == PlantStatus.AVAILABLE;
     }
 }
