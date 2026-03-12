@@ -42,6 +42,13 @@ public class PlantAvailability {
         this.status = PlantStatus.AVAILABLE;
     }
 
+    public void sell(){
+        if(status == PlantStatus.SOLD)
+            throw new IllegalStateException("Plant is already sold");
+
+        status = PlantStatus.SOLD;
+    }
+
     public boolean isAvailable() {
         return status == PlantStatus.AVAILABLE;
     }

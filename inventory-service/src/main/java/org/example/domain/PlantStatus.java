@@ -2,5 +2,6 @@ package org.example.domain;
 
 public enum PlantStatus {
     AVAILABLE,
-    RESERVED
+    RESERVED,
+    SOLD
 }
