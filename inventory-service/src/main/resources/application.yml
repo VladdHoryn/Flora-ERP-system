@@ -17,3 +17,7 @@ spring:
 
 server:
   port: 8082
+
+production-service:
+    base-url: http://localhost:8082
+    production-path: /production/v1
