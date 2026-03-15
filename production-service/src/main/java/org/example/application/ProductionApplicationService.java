@@ -1,9 +1,14 @@
 package org.example.application;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.example.config.InventoryServiceClient;
+import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
+import org.example.exception.PlantBatchNotFoundException;
+import org.example.exception.PlantNotFoundException;
 import org.springframework.stereotype.Service;
 import org.example.repository.PlantBatchRepository;
 import org.example.repository.PlantRepository;
@@ -15,27 +20,53 @@ import java.util.List;
 public class ProductionApplicationService {
     private final PlantRepository plantRepository;
     private final PlantBatchRepository plantBatchRepository;
+    private final InventoryServiceClient inventoryServiceClient;
 
     public List<Plant> getAllPlants(){
+
         return plantRepository.findAll();
     }
 
     public Plant getPlantById(Long id){
         return plantRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plant not found with id: " + id));
+                .orElseThrow(() -> new PlantNotFoundException(id));
     }
 
+    @Transactional
     public Plant createPlant(Plant plant){
+        PlantBatch plantBatch = plantBatchRepository.findById(plant.getBatchId())
+                .orElseThrow(() -> new RuntimeException("Can not create plant with non existent Plant Batch"));
+
+        plantBatch.incrementTotalCount(1);
         return plantRepository.save(plant);
     }
 
+    @Transactional
     public Plant updatePlant(Long id, Plant plant){
         Plant existing = getPlantById(id);
+
+        if(existing.getBatchId() != plant.getBatchId()){
+            PlantBatch prevPlantBatch = plantBatchRepository.findById(existing.getBatchId())
+                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
+            PlantBatch newPlantBatch = plantBatchRepository.findById(plant.getBatchId())
+                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
+
+            prevPlantBatch.decrementTotalCount(1);
+            newPlantBatch.incrementTotalCount(1);
+        }
+
         existing.copy(plant);
         return plantRepository.save(existing);
     }
 
+    @Transactional
     public void deletePlant(Long id){
+        Plant plant = getPlantById(id);
+
+        PlantBatch plantBatch = plantBatchRepository.findById(plant.getBatchId())
+                .orElseThrow(() -> new PlantBatchNotFoundException());
+
+        plantBatch.decrementTotalCount(1);
         plantRepository.deleteById(id);
     }
 
@@ -43,20 +74,56 @@ public class ProductionApplicationService {
         return plantBatchRepository.findAll();
     }
 
+    @Transactional
     public PlantBatch createPlantBatch(PlantBatch plantBatch){
         return plantBatchRepository.save(plantBatch);
+    }
+
+    @Transactional
+    public PlantBatch updatePlantBatch(Long batchId, PlantBatch plantBatch){
+        PlantBatch existing = plantBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
+        existing.copy(plantBatch);
+
+        updateTotalCountForBatch(existing.getId());
+        return plantBatchRepository.save(existing);
+    }
+
+    @Transactional
+    public void deletePlantBatch(Long batchId){
+        List<Plant> plants = plantRepository.findAllByBatchId(batchId);
+
+        for (var plant : plants){
+            deletePlant(plant.getId());
+        }
+
+        plantBatchRepository.deleteById(batchId);
     }
 
     public Integer findPlantsAmountInBatch(Long batchId){
         return plantRepository.findAllByBatchId(batchId).size();
     }
 
+    @Transactional
     public PlantBatch updateTotalCountForBatch(Long batchId){
-        PlantBatch plantBatch = plantBatchRepository.findById(batchId).orElseThrow(
-                () -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
-
+        PlantBatch plantBatch = plantBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
         plantBatch.setTotalCount(findPlantsAmountInBatch(batchId));
 
-        return plantBatch;
+        return plantBatchRepository.save(plantBatch);
+    }
+
+    public List<Long> findHealthyPlantIds(String plantName,
+                                          PlantType plantType,
+                                          Integer plantAge) {
+
+        List<Plant> plants =
+                plantRepository.findAllByPlantTypeAndName(plantType, plantName);
+
+        return plants.stream()
+                .filter(p -> p.getGrowthStage().getAge() == plantAge)
+                .filter(Plant::isHealthy)
+                .map(Plant::getId)
+                .toList();
     }
 }

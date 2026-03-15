@@ -1,8 +1,5 @@
-package org.example.domain;
+package org.example.domain.inventory;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(description = "Type of the plant")
 public enum PlantType {
 
     GINKGO("ginkgo"),

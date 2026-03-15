@@ -1,0 +1,178 @@
+package org.example.application;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.example.config.ProductionServiceClient;
+import org.example.domain.PlantAvailability;
+import org.example.domain.inventory.PlantInventory;
+import org.example.domain.inventory.PlantType;
+import org.example.domain.reservation.Reservation;
+import org.example.dto.PlantData;
+import org.example.exception.InventoryNotFoundException;
+import org.example.exception.PlantAvailabilityNotFoundException;
+import org.example.exception.ReservationNotFoundException;
+import org.example.repository.PlantAvailabilityRepository;
+import org.example.repository.PlantInventoryRepository;
+import org.example.repository.ReservationRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class InventoryApplicationService {
+    private final PlantInventoryRepository plantInventoryRepository;
+    private final ReservationRepository reservationRepository;
+    private final PlantAvailabilityRepository plantAvailabilityRepository;
+    private final ProductionServiceClient productionServiceClient;
+
+    public List<PlantInventory> getAllInventories() {
+        return plantInventoryRepository.findAll();
+    }
+
+    public PlantInventory getInventoryById(Long id) {
+        return plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+    }
+
+    @Transactional
+    public PlantInventory createInventory(PlantInventory inventory) {
+        return plantInventoryRepository.save(inventory);
+    }
+
+    @Transactional
+    public PlantInventory updateInventory(Long id, PlantInventory inventory) {
+
+        PlantInventory existing = getInventoryById(id);
+
+        existing.setPlantType(inventory.getPlantType());
+        existing.setPlantsName(inventory.getPlantsName());
+        existing.setAge(inventory.getAge());
+
+        return plantInventoryRepository.save(existing);
+    }
+
+    @Transactional
+    public void deleteInventory(Long id) {
+        plantInventoryRepository.deleteById(id);
+    }
+
+    public PlantInventory getInventory(PlantType plantType, String plantName, Integer plantAge){
+
+        return plantInventoryRepository
+                .findByPlantTypeAndPlantsNameAndAge(plantType, plantName, plantAge.longValue())
+                .orElseThrow(() -> new InventoryNotFoundException());
+    }
+
+    // ---------------- RESERVATIONS ----------------
+
+    @Transactional
+    public Reservation createReservation(List<PlantData> plants){
+
+        Reservation reservation = new Reservation();
+        reservationRepository.save(reservation);
+
+        for (PlantData plant : plants) {
+            PlantInventory inventory = getInventory(
+                    plant.plantType(),
+                    plant.plantName(),
+                    Math.toIntExact(plant.plantAge())
+            );
+
+            List<Long> plantIds = productionServiceClient.findHealthyPlantIds(
+                    plant.plantType(),
+                    plant.plantName(),
+                    Math.toIntExact(plant.plantAge())
+            );
+
+            List<Long> availablePlantIds = plantIds.stream()
+                    .filter(id -> plantAvailabilityRepository.findById(id)
+                            .map(PlantAvailability::isAvailable)
+                            .orElse(false))
+                    .limit(plant.quantity())
+                    .toList();
+
+            if (availablePlantIds.size() < plant.quantity()) {
+                throw new RuntimeException("Not enough available plants for reservation");
+            }
+
+            for (Long plantId : availablePlantIds) {
+                addPlantToReservation(reservation.getId(), plantId);
+            }
+
+            inventory.reserve((long) plant.quantity());
+            plantInventoryRepository.save(inventory);
+        }
+
+        return reservation;
+    }
+
+    @Transactional
+    public PlantAvailability addPlantToReservation(Long reservationId, Long plantId){
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+
+        PlantAvailability availability = plantAvailabilityRepository.findById(plantId)
+                .orElseThrow(() -> new PlantAvailabilityNotFoundException(plantId));
+
+        availability.reserve(reservationId);
+
+        return plantAvailabilityRepository.save(availability);
+    }
+
+    @Transactional
+    public void removePlantFromReservation(Long plantId){
+
+        PlantAvailability plant = plantAvailabilityRepository.findById(plantId)
+                .orElseThrow(() -> new PlantAvailabilityNotFoundException(plantId));
+
+        plant.release();
+
+        plantAvailabilityRepository.save(plant);
+    }
+
+    @Transactional
+    public void cancelReservation(Long reservationId){
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+
+        reservation.cancel();
+
+        List<PlantAvailability> reservedPlants =
+                plantAvailabilityRepository.findAllByReservationId(reservationId);
+
+        for (PlantAvailability plant : reservedPlants) {
+            plant.release();
+            plantAvailabilityRepository.save(plant);
+        }
+
+
+        reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public void expireReservations(Long reservationId){
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+
+        if (reservation.getExpiresAt().isBefore(LocalDateTime.now())) {
+
+            reservation.expire();
+
+            List<PlantAvailability> plants =
+                    plantAvailabilityRepository.findAllByReservationId(reservationId);
+
+            for (PlantAvailability plant : plants) {
+                plant.release();
+                plantAvailabilityRepository.save(plant);
+            }
+
+            reservationRepository.save(reservation);
+        }
+    }
+}
