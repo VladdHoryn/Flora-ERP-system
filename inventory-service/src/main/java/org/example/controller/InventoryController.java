@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.application.InventoryApplicationService;
 import org.example.domain.PlantAvailability;
@@ -50,7 +51,7 @@ public class InventoryController {
     // ---------------- RESERVATIONS ----------------
 
     @PostMapping("/reservations")
-    public Reservation createReservation(@RequestBody List<PlantData> plants) {
+    public Reservation createReservation(@Valid @RequestBody List<PlantData> plants) {
         return inventoryApplicationService.createReservation(plants);
     }
 
