@@ -14,4 +14,6 @@ public class ProductionServiceClient {
 
     @Value("${production-service.production-path}")
     private String productionUrl;
+
+
 }

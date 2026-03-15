@@ -1,6 +1,8 @@
 package org.example.application;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
+import org.example.config.ProductionServiceClient;
 import org.example.domain.PlantAvailability;
 import org.example.domain.inventory.PlantInventory;
 import org.example.domain.inventory.PlantType;
@@ -11,6 +13,7 @@ import org.example.repository.PlantInventoryRepository;
 import org.example.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,31 +22,128 @@ public class InventoryApplicationService {
     private final PlantInventoryRepository plantInventoryRepository;
     private final ReservationRepository reservationRepository;
     private final PlantAvailabilityRepository plantAvailabilityRepository;
+    private final ProductionServiceClient productionServiceClient;
 
-    public PlantInventory calculateStock(PlantType plantType, String plantName, Integer plantAge){
-        return new PlantInventory();
+    public List<PlantInventory> getAllInventories() {
+        return plantInventoryRepository.findAll();
     }
+
+    public PlantInventory getInventoryById(Long id) {
+        return plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+    }
+
+    public PlantInventory createInventory(PlantInventory inventory) {
+        return plantInventoryRepository.save(inventory);
+    }
+
+    public PlantInventory updateInventory(Long id, PlantInventory inventory) {
+
+        PlantInventory existing = getInventoryById(id);
+
+        existing.setPlantType(inventory.getPlantType());
+        existing.setPlantsName(inventory.getPlantsName());
+        existing.setAge(inventory.getAge());
+
+        return plantInventoryRepository.save(existing);
+    }
+
+    public void deleteInventory(Long id) {
+        plantInventoryRepository.deleteById(id);
+    }
+
+    public void updateStock(){}
+
     public PlantInventory getInventory(PlantType plantType, String plantName, Integer plantAge){
-        return new PlantInventory();
+
+        return plantInventoryRepository
+                .findByPlantTypeAndPlantsNameAndAge(plantType, plantName, plantAge.longValue())
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
     }
+
+    // ---------------- RESERVATIONS ----------------
 
     public Reservation createReservation(List<PlantData> plants){
-        return new Reservation();
+
+        Reservation reservation = new Reservation();
+
+        reservationRepository.save(reservation);
+
+        for (PlantData plant : plants) {
+
+            PlantInventory inventory = getInventory(
+                    plant.plantType(),
+                    plant.plantName(),
+                    Math.toIntExact(plant.plantAge())
+            );
+
+            inventory.reserve(plant.quantity());
+
+            plantInventoryRepository.save(inventory);
+        }
+
+        return reservation;
+    } //Дописати
+
+    public PlantAvailability addPlantToReservation(Long reservationId, Long plantId){
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        PlantAvailability availability = plantAvailabilityRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Plant availability not found"));
+
+        availability.reserve(reservationId);
+
+        return plantAvailabilityRepository.save(availability);
     }
 
-    public PlantAvailability addPlantToReservation(Long reservationId, Long PlantId){
-        return new PlantAvailability();
+    public void removePlantFromReservation(Long plantId){
+
+        PlantAvailability plant = plantAvailabilityRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Plant not found"));
+
+        plant.release();
+
+        plantAvailabilityRepository.save(plant);
     }
 
     public void cancelReservation(Long reservationId){
 
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        reservation.cancel();
+
+        List<PlantAvailability> reservedPlants =
+                plantAvailabilityRepository.findAllByReservationId(reservationId);
+
+        for (PlantAvailability plant : reservedPlants) {
+            plant.release();
+            plantAvailabilityRepository.save(plant);
+        }
+
+        reservationRepository.save(reservation);
     }
 
     public void expireReservations(Long reservationId){
 
-    }
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-    public void removePlantFromReservation(Long PlantId){
+        if (reservation.getExpiresAt().isBefore(LocalDateTime.now())) {
 
+            reservation.expire();
+
+            List<PlantAvailability> plants =
+                    plantAvailabilityRepository.findAllByReservationId(reservationId);
+
+            for (PlantAvailability plant : plants) {
+                plant.release();
+                plantAvailabilityRepository.save(plant);
+            }
+
+            reservationRepository.save(reservation);
+        }
     }
 }

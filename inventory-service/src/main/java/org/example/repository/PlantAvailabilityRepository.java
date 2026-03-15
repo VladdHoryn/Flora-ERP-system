@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface PlantAvailabilityRepository extends JpaRepository<PlantAvailability, Long> {
     List<PlantAvailability> findByStatus(PlantStatus status);
 
+    List<PlantAvailability> findAllByReservationId(Long reservationId);
+
 //    List<PlantAvailability> findByReservationId(Long reservationId);
 //
 //    Optional<PlantAvailability> findByPlantId(Long plantId);
