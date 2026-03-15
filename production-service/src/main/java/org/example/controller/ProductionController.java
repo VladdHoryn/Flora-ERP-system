@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.application.ProductionApplicationService;
+import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.plantbatch.PlantBatch;
@@ -74,5 +75,15 @@ public class ProductionController {
     @PutMapping("/batches/{id}/recount")
     public PlantBatch recountBatch(@PathVariable Long id) {
         return productionApplicationService.updateTotalCountForBatch(id);
+    }
+
+    @GetMapping("/plants/healthy")
+    public List<Long> findHealthyPlantIds(
+            @RequestParam String plantName,
+            @RequestParam PlantType plantType,
+            @RequestParam Integer plantAge
+    ) {
+        return productionApplicationService
+                .findHealthyPlantIds(plantName, plantType, plantAge);
     }
 }

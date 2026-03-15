@@ -1,6 +1,7 @@
 package org.example.application;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.example.config.ProductionServiceClient;
 import org.example.domain.PlantAvailability;
@@ -33,10 +34,12 @@ public class InventoryApplicationService {
                 .orElseThrow(() -> new RuntimeException("Inventory not found"));
     }
 
+    @Transactional
     public PlantInventory createInventory(PlantInventory inventory) {
         return plantInventoryRepository.save(inventory);
     }
 
+    @Transactional
     public PlantInventory updateInventory(Long id, PlantInventory inventory) {
 
         PlantInventory existing = getInventoryById(id);
@@ -48,11 +51,10 @@ public class InventoryApplicationService {
         return plantInventoryRepository.save(existing);
     }
 
+    @Transactional
     public void deleteInventory(Long id) {
         plantInventoryRepository.deleteById(id);
     }
-
-    public void updateStock(){}
 
     public PlantInventory getInventory(PlantType plantType, String plantName, Integer plantAge){
 
@@ -63,28 +65,48 @@ public class InventoryApplicationService {
 
     // ---------------- RESERVATIONS ----------------
 
+    @Transactional
     public Reservation createReservation(List<PlantData> plants){
 
         Reservation reservation = new Reservation();
-
         reservationRepository.save(reservation);
 
         for (PlantData plant : plants) {
-
             PlantInventory inventory = getInventory(
                     plant.plantType(),
                     plant.plantName(),
                     Math.toIntExact(plant.plantAge())
             );
 
-            inventory.reserve(plant.quantity());
+            List<Long> plantIds = productionServiceClient.findHealthyPlantIds(
+                    plant.plantType(),
+                    plant.plantName(),
+                    Math.toIntExact(plant.plantAge())
+            );
 
+            List<Long> availablePlantIds = plantIds.stream()
+                    .filter(id -> plantAvailabilityRepository.findById(id)
+                            .map(PlantAvailability::isAvailable)
+                            .orElse(false))
+                    .limit(plant.quantity())
+                    .toList();
+
+            if (availablePlantIds.size() < plant.quantity()) {
+                throw new RuntimeException("Not enough available plants for reservation");
+            }
+
+            for (Long plantId : availablePlantIds) {
+                addPlantToReservation(reservation.getId(), plantId);
+            }
+
+            inventory.reserve((long) plant.quantity());
             plantInventoryRepository.save(inventory);
         }
 
         return reservation;
-    } //Дописати
+    }
 
+    @Transactional
     public PlantAvailability addPlantToReservation(Long reservationId, Long plantId){
 
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -98,6 +120,7 @@ public class InventoryApplicationService {
         return plantAvailabilityRepository.save(availability);
     }
 
+    @Transactional
     public void removePlantFromReservation(Long plantId){
 
         PlantAvailability plant = plantAvailabilityRepository.findById(plantId)
@@ -108,6 +131,7 @@ public class InventoryApplicationService {
         plantAvailabilityRepository.save(plant);
     }
 
+    @Transactional
     public void cancelReservation(Long reservationId){
 
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -123,9 +147,11 @@ public class InventoryApplicationService {
             plantAvailabilityRepository.save(plant);
         }
 
+
         reservationRepository.save(reservation);
     }
 
+    @Transactional
     public void expireReservations(Long reservationId){
 
         Reservation reservation = reservationRepository.findById(reservationId)

@@ -3,6 +3,7 @@ package org.example.application;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.example.config.InventoryServiceClient;
+import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
@@ -110,5 +111,19 @@ public class ProductionApplicationService {
         plantBatch.setTotalCount(findPlantsAmountInBatch(batchId));
 
         return plantBatchRepository.save(plantBatch);
+    }
+
+    public List<Long> findHealthyPlantIds(String plantName,
+                                          PlantType plantType,
+                                          Integer plantAge) {
+
+        List<Plant> plants =
+                plantRepository.findAllByPlantTypeAndName(plantType, plantName);
+
+        return plants.stream()
+                .filter(p -> p.getGrowthStage().getAge() == plantAge)
+                .filter(Plant::isHealthy)
+                .map(Plant::getId)
+                .toList();
     }
 }
