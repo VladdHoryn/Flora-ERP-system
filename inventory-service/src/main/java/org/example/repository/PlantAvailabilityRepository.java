@@ -15,11 +15,11 @@ import java.util.Optional;
 public interface PlantAvailabilityRepository extends JpaRepository<PlantAvailability, Long> {
     List<PlantAvailability> findByStatus(PlantStatus status);
 
-    List<PlantAvailability> findByReservationId(Long reservationId);
+//    List<PlantAvailability> findByReservationId(Long reservationId);
+//
+//    Optional<PlantAvailability> findByPlantId(Long plantId);
 
-    Optional<PlantAvailability> findByPlantId(Long plantId);
+//    Page<PlantAvailability> findAvailable(PageRequest of);
 
-    Page<PlantAvailability> findAvailable(PageRequest of);
-
-    List<PlantAvailability> findAvailablePlants(PlantType plantType, String s, Long aLong, Long quantity);
+//    List<PlantAvailability> findAvailablePlants(PlantType plantType, String s, Long aLong, Long quantity);
 }

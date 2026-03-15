@@ -2,6 +2,7 @@ package org.example.application;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.example.config.InventoryServiceClient;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 public class ProductionApplicationService {
     private final PlantRepository plantRepository;
     private final PlantBatchRepository plantBatchRepository;
+    private final InventoryServiceClient inventoryServiceClient;
 
     public List<Plant> getAllPlants(){
 
