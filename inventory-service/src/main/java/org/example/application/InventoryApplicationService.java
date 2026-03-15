@@ -9,6 +9,9 @@ import org.example.domain.inventory.PlantInventory;
 import org.example.domain.inventory.PlantType;
 import org.example.domain.reservation.Reservation;
 import org.example.dto.PlantData;
+import org.example.exception.InventoryNotFoundException;
+import org.example.exception.PlantAvailabilityNotFoundException;
+import org.example.exception.ReservationNotFoundException;
 import org.example.repository.PlantAvailabilityRepository;
 import org.example.repository.PlantInventoryRepository;
 import org.example.repository.ReservationRepository;
@@ -60,7 +63,7 @@ public class InventoryApplicationService {
 
         return plantInventoryRepository
                 .findByPlantTypeAndPlantsNameAndAge(plantType, plantName, plantAge.longValue())
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+                .orElseThrow(() -> new InventoryNotFoundException());
     }
 
     // ---------------- RESERVATIONS ----------------
@@ -110,10 +113,10 @@ public class InventoryApplicationService {
     public PlantAvailability addPlantToReservation(Long reservationId, Long plantId){
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
 
         PlantAvailability availability = plantAvailabilityRepository.findById(plantId)
-                .orElseThrow(() -> new RuntimeException("Plant availability not found"));
+                .orElseThrow(() -> new PlantAvailabilityNotFoundException(plantId));
 
         availability.reserve(reservationId);
 
@@ -124,7 +127,7 @@ public class InventoryApplicationService {
     public void removePlantFromReservation(Long plantId){
 
         PlantAvailability plant = plantAvailabilityRepository.findById(plantId)
-                .orElseThrow(() -> new RuntimeException("Plant not found"));
+                .orElseThrow(() -> new PlantAvailabilityNotFoundException(plantId));
 
         plant.release();
 
@@ -135,7 +138,7 @@ public class InventoryApplicationService {
     public void cancelReservation(Long reservationId){
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
 
         reservation.cancel();
 
@@ -155,7 +158,7 @@ public class InventoryApplicationService {
     public void expireReservations(Long reservationId){
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
 
         if (reservation.getExpiresAt().isBefore(LocalDateTime.now())) {
 
