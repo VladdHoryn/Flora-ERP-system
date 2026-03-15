@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.application.InventoryApplicationService;
@@ -51,6 +52,7 @@ public class InventoryController {
     // ---------------- RESERVATIONS ----------------
 
     @PostMapping("/reservations")
+    @Operation(summary = "Create a new plant reservation", description = "Reserves specified quantity of healthy plants")
     public Reservation createReservation(@Valid @RequestBody List<PlantData> plants) {
         return inventoryApplicationService.createReservation(plants);
     }

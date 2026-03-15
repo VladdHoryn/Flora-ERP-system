@@ -3,9 +3,9 @@ spring:
     name: inventory-service
 
   datasource:
-    username: root
-    password: 12345
-    url: jdbc:mariadb://localhost:3306/inventory_service_db
+    username: ${DB_USERNAME:root}
+    password: ${DB_USERNAME:12345}
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/inventory_service_db}
 
   jpa:
     hibernate:
@@ -16,8 +16,8 @@ spring:
         format_sql: true
 
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
 
 production-service:
-    base-url: http://localhost:8082
-    production-path: /production/v1
+    base-url: ${PRODUCTION_BASE_URL:http://localhost:8081}
+    production-path: ${PRODUCTION_BASE_URL:http://localhost:8081}
