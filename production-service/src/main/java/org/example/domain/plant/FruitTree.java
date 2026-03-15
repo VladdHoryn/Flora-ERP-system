@@ -90,4 +90,31 @@ public class FruitTree extends Plant {
         this.frostResistance = frostResistance;
         this.lightRequirements = lightRequirements;
     }
+
+    @Override
+    public void copy(Plant plant) {
+
+        super.copy(plant);
+
+        if (!(plant instanceof FruitTree fruitTree)) {
+            throw new IllegalArgumentException("Cannot copy non-FruitTree into FruitTree");
+        }
+
+        this.plantDescription = fruitTree.plantDescription;
+        this.fruitWeight = fruitTree.fruitWeight;
+        this.propagationType = fruitTree.propagationType;
+
+        this.heightAtMaturity = fruitTree.heightAtMaturity;
+        this.ripeningPeriod = fruitTree.ripeningPeriod;
+        this.varietyAdvantages = fruitTree.varietyAdvantages;
+        this.fruitTaste = fruitTree.fruitTaste;
+
+        this.harvestTime = fruitTree.harvestTime;
+        this.storageDurationDays = fruitTree.storageDurationDays;
+
+        this.soilRequirements = fruitTree.soilRequirements;
+        this.frostResistance = fruitTree.frostResistance;
+        this.lightRequirements = fruitTree.lightRequirements;
+        this.recommendedPollinators = fruitTree.recommendedPollinators;
+    }
 }

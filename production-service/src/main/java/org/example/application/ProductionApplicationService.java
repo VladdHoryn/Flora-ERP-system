@@ -86,14 +86,14 @@ public class ProductionApplicationService {
     }
 
     @Transactional
-    public void deletePlantBatch(PlantBatch plantBatch){
-        List<Plant> plants = plantRepository.findAllByBatchId(plantBatch.getId());
+    public void deletePlantBatch(Long batchId){
+        List<Plant> plants = plantRepository.findAllByBatchId(batchId);
 
         for (var plant : plants){
             deletePlant(plant.getId());
         }
 
-        plantBatchRepository.deleteById(plantBatch.getId());
+        plantBatchRepository.deleteById(batchId);
     }
 
     public Integer findPlantsAmountInBatch(Long batchId){

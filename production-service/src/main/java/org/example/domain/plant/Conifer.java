@@ -68,4 +68,28 @@ public class Conifer extends Plant{
         this.frostResistance = frostResistance;
         this.lightRequirements = lightRequirements;
     }
+
+    @Override
+    public void copy(Plant plant) {
+
+        super.copy(plant);
+
+        if (!(plant instanceof Conifer conifer)) {
+            throw new IllegalArgumentException("Cannot copy non-Conifer into Conifer");
+        }
+
+        this.plantDescription = conifer.plantDescription;
+        this.propagationType = conifer.propagationType;
+
+        this.heightAtTenYears = conifer.heightAtTenYears;
+        this.needleColor = conifer.needleColor;
+        this.crownShape = conifer.crownShape;
+
+        this.annualGrowthRate = conifer.annualGrowthRate;
+        this.crownWidthAtMaturity = conifer.crownWidthAtMaturity;
+
+        this.soilRequirements = conifer.soilRequirements;
+        this.frostResistance = conifer.frostResistance;
+        this.lightRequirements = conifer.lightRequirements;
+    }
 }
