@@ -7,6 +7,8 @@ import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
+import org.example.exception.PlantBatchNotFoundException;
+import org.example.exception.PlantNotFoundException;
 import org.springframework.stereotype.Service;
 import org.example.repository.PlantBatchRepository;
 import org.example.repository.PlantRepository;
@@ -27,7 +29,7 @@ public class ProductionApplicationService {
 
     public Plant getPlantById(Long id){
         return plantRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plant not found with id: " + id));
+                .orElseThrow(() -> new PlantNotFoundException(id));
     }
 
     @Transactional
@@ -45,9 +47,9 @@ public class ProductionApplicationService {
 
         if(existing.getBatchId() != plant.getBatchId()){
             PlantBatch prevPlantBatch = plantBatchRepository.findById(existing.getBatchId())
-                    .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
+                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
             PlantBatch newPlantBatch = plantBatchRepository.findById(plant.getBatchId())
-                    .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
+                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
 
             prevPlantBatch.decrementTotalCount(1);
             newPlantBatch.incrementTotalCount(1);
@@ -62,7 +64,7 @@ public class ProductionApplicationService {
         Plant plant = getPlantById(id);
 
         PlantBatch plantBatch = plantBatchRepository.findById(plant.getBatchId())
-                .orElseThrow(() -> new RuntimeException("Plant Batch not found"));
+                .orElseThrow(() -> new PlantBatchNotFoundException());
 
         plantBatch.decrementTotalCount(1);
         plantRepository.deleteById(id);
@@ -80,8 +82,7 @@ public class ProductionApplicationService {
     @Transactional
     public PlantBatch updatePlantBatch(Long batchId, PlantBatch plantBatch){
         PlantBatch existing = plantBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
-
+                .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
         existing.copy(plantBatch);
 
         updateTotalCountForBatch(existing.getId());
@@ -105,9 +106,8 @@ public class ProductionApplicationService {
 
     @Transactional
     public PlantBatch updateTotalCountForBatch(Long batchId){
-        PlantBatch plantBatch = plantBatchRepository.findById(batchId).orElseThrow(
-                () -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
-
+        PlantBatch plantBatch = plantBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
         plantBatch.setTotalCount(findPlantsAmountInBatch(batchId));
 
         return plantBatchRepository.save(plantBatch);
