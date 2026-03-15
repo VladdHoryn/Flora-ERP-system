@@ -64,4 +64,11 @@ public class PlantBatch {
 
         this.totalCount -= delta;
     }
+
+    public void copy(PlantBatch plantBatch){
+        this.plantType = plantBatch.plantType;
+        this.plantsName = plantBatch.plantsName;
+        this.location = plantBatch.location;
+        this.plantedAt = plantBatch.plantedAt;
+    }
 }

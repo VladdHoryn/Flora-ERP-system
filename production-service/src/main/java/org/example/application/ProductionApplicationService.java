@@ -1,5 +1,6 @@
 package org.example.application;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantbatch.PlantBatch;
@@ -17,6 +18,7 @@ public class ProductionApplicationService {
     private final PlantBatchRepository plantBatchRepository;
 
     public List<Plant> getAllPlants(){
+
         return plantRepository.findAll();
     }
 
@@ -25,17 +27,41 @@ public class ProductionApplicationService {
                 .orElseThrow(() -> new RuntimeException("Plant not found with id: " + id));
     }
 
+    @Transactional
     public Plant createPlant(Plant plant){
+        PlantBatch plantBatch = plantBatchRepository.findById(plant.getBatchId())
+                .orElseThrow(() -> new RuntimeException("Can not create plant with non existent Plant Batch"));
+
+        plantBatch.incrementTotalCount(1);
         return plantRepository.save(plant);
     }
 
+    @Transactional
     public Plant updatePlant(Long id, Plant plant){
         Plant existing = getPlantById(id);
+
+        if(existing.getBatchId() != plant.getBatchId()){
+            PlantBatch prevPlantBatch = plantBatchRepository.findById(existing.getBatchId())
+                    .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
+            PlantBatch newPlantBatch = plantBatchRepository.findById(plant.getBatchId())
+                    .orElseThrow(() -> new RuntimeException("Plant Batch was not found"));
+
+            prevPlantBatch.decrementTotalCount(1);
+            newPlantBatch.incrementTotalCount(1);
+        }
+
         existing.copy(plant);
         return plantRepository.save(existing);
     }
 
+    @Transactional
     public void deletePlant(Long id){
+        Plant plant = getPlantById(id);
+
+        PlantBatch plantBatch = plantBatchRepository.findById(plant.getBatchId())
+                .orElseThrow(() -> new RuntimeException("Plant Batch not found"));
+
+        plantBatch.decrementTotalCount(1);
         plantRepository.deleteById(id);
     }
 
@@ -43,20 +69,44 @@ public class ProductionApplicationService {
         return plantBatchRepository.findAll();
     }
 
+    @Transactional
     public PlantBatch createPlantBatch(PlantBatch plantBatch){
         return plantBatchRepository.save(plantBatch);
+    }
+
+    @Transactional
+    public PlantBatch updatePlantBatch(Long batchId, PlantBatch plantBatch){
+        PlantBatch existing = plantBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
+
+        existing.copy(plantBatch);
+
+        updateTotalCountForBatch(existing.getId());
+        return plantBatchRepository.save(existing);
+    }
+
+    @Transactional
+    public void deletePlantBatch(PlantBatch plantBatch){
+        List<Plant> plants = plantRepository.findAllByBatchId(plantBatch.getId());
+
+        for (var plant : plants){
+            deletePlant(plant.getId());
+        }
+
+        plantBatchRepository.deleteById(plantBatch.getId());
     }
 
     public Integer findPlantsAmountInBatch(Long batchId){
         return plantRepository.findAllByBatchId(batchId).size();
     }
 
+    @Transactional
     public PlantBatch updateTotalCountForBatch(Long batchId){
         PlantBatch plantBatch = plantBatchRepository.findById(batchId).orElseThrow(
                 () -> new RuntimeException("Plant batch with id: " + batchId + "was not found"));
 
         plantBatch.setTotalCount(findPlantsAmountInBatch(batchId));
 
-        return plantBatch;
+        return plantBatchRepository.save(plantBatch);
     }
 }

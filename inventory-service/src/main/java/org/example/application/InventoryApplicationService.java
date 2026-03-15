@@ -20,7 +20,7 @@ public class InventoryApplicationService {
     private final ReservationRepository reservationRepository;
     private final PlantAvailabilityRepository plantAvailabilityRepository;
 
-    public PlantInventory CalculateStock(PlantType plantType, String plantName, Integer plantAge){
+    public PlantInventory calculateStock(PlantType plantType, String plantName, Integer plantAge){
         return new PlantInventory();
     }
     public PlantInventory getInventory(PlantType plantType, String plantName, Integer plantAge){
