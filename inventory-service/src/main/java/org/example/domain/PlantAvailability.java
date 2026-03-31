@@ -19,7 +19,13 @@ public class PlantAvailability {
         reservationId = null;
         status = PlantStatus.AVAILABLE;
     }
-    public PlantAvailability(Long reservationId){
+    public PlantAvailability(Long plantId){
+        this.plantId = plantId;
+        reservationId = null;
+        status = PlantStatus.AVAILABLE;
+    }
+    public PlantAvailability(Long plantId, Long reservationId){
+        this.plantId = plantId;
         this.reservationId = reservationId;
         status = PlantStatus.RESERVED;
     }

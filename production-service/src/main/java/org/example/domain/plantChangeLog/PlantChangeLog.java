@@ -2,6 +2,7 @@ package org.example.domain.plantChangeLog;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.domain.PlantType;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,11 @@ public class PlantChangeLog {
 
     private Long plantId;
     private Long batchId;
+
+    private PlantType plantType;
+    private String plantsName;
+    private Long age;
+
     private int quantityChange; // +1 або -1
     private ChangeType changeType; // "CREATE", "UPDATE", "DELETE", "DISEASE"
 

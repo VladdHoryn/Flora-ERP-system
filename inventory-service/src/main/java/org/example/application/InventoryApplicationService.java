@@ -81,6 +81,37 @@ public class InventoryApplicationService {
                 .orElseThrow(() -> new InventoryNotFoundException());
     }
 
+    @Transactional
+    public PlantInventory findInventoryByPlantTypeAndPlantsNameAndAge(
+            PlantType plantType,
+            String plantsName,
+            Long age
+    ){
+        return plantInventoryRepository.findByPlantTypeAndPlantsNameAndAge(plantType, plantsName, age).orElse(
+                this.createInventory(new PlantInventory(plantType, plantsName, age))
+        );
+    }
+
+    @Transactional
+    public PlantInventory changeTotalQuantity(Long id, Long totalChanged){
+        PlantInventory inventory = plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PlantInventory not found"));
+
+        inventory.setTotalQuantity(inventory.getTotalQuantity() + totalChanged);
+
+        return plantInventoryRepository.save(inventory);
+    }
+
+    @Transactional
+    public PlantInventory changeAvailableQuantity(Long id, Long availableChanged){
+        PlantInventory inventory = plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PlantInventory not found"));
+
+        inventory.setAvailableQuantity(inventory.getAvailableQuantity() + availableChanged);
+
+        return plantInventoryRepository.save(inventory);
+    }
+
     // ---------------- RESERVATIONS ----------------
 
     @Transactional
@@ -191,13 +222,34 @@ public class InventoryApplicationService {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000) //Дописати з врахування захворювання і тп зарезервованої рослини
     public void fetchPlantChanges(){
         List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
         lastCheck = LocalDateTime.now();
 
         for (PlantChangeDTO change : changes){ //Дописати
+            PlantInventory inventory = this.findInventoryByPlantTypeAndPlantsNameAndAge(change.getPlantType(), change.getPlantsName(), change.getAge());
 
+            if(change.getChangeType().equals("CREATE")){
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("UPDATE")){
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+
+                PlantAvailability plantAvailability = this.plantAvailabilityRepository.findById(change.getPlantId())
+                        .orElse(plantAvailabilityRepository.save(new PlantAvailability(change.getPlantId())));
+
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("DELETE")){
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("DISEASE")){
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
         }
     }
 }
