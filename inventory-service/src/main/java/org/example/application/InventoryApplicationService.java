@@ -3,11 +3,13 @@ package org.example.application;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.config.ProductionServiceClient;
 import org.example.domain.PlantAvailability;
 import org.example.domain.inventory.PlantInventory;
 import org.example.domain.inventory.PlantType;
 import org.example.domain.reservation.Reservation;
+import org.example.dto.PlantChangeDTO;
 import org.example.dto.PlantData;
 import org.example.exception.InventoryNotFoundException;
 import org.example.exception.PlantAvailabilityNotFoundException;
@@ -15,18 +17,31 @@ import org.example.exception.ReservationNotFoundException;
 import org.example.repository.PlantAvailabilityRepository;
 import org.example.repository.PlantInventoryRepository;
 import org.example.repository.ReservationRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
 public class InventoryApplicationService {
     private final PlantInventoryRepository plantInventoryRepository;
     private final ReservationRepository reservationRepository;
     private final PlantAvailabilityRepository plantAvailabilityRepository;
     private final ProductionServiceClient productionServiceClient;
+
+    private LocalDateTime lastCheck;
+
+    public InventoryApplicationService(PlantInventoryRepository plantInventoryRepository,
+                                       ReservationRepository reservationRepository,
+                                       PlantAvailabilityRepository plantAvailabilityRepository,
+                                       ProductionServiceClient productionServiceClient){
+        this.plantInventoryRepository = plantInventoryRepository;
+        this.reservationRepository = reservationRepository;
+        this.plantAvailabilityRepository = plantAvailabilityRepository;
+        this.productionServiceClient = productionServiceClient;
+        lastCheck = LocalDateTime.now().minusMinutes(1);
+    }
 
     public List<PlantInventory> getAllInventories() {
         return plantInventoryRepository.findAll();
@@ -81,7 +96,7 @@ public class InventoryApplicationService {
                     Math.toIntExact(plant.plantAge())
             );
 
-            List<Long> plantIds = productionServiceClient.findHealthyPlantIds( //Дописати
+            List<Long> plantIds = productionServiceClient.findHealthyPlantIds(
                     plant.plantType(),
                     plant.plantName(),
                     Math.toIntExact(plant.plantAge())
@@ -173,6 +188,16 @@ public class InventoryApplicationService {
             }
 
             reservationRepository.save(reservation);
+        }
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void fetchPlantChanges(){
+        List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
+        lastCheck = LocalDateTime.now();
+
+        for (PlantChangeDTO change : changes){ //Дописати
+
         }
     }
 }
