@@ -5,14 +5,18 @@ import lombok.AllArgsConstructor;
 import org.example.config.InventoryServiceClient;
 import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
+import org.example.domain.plantChangeLog.ChangeType;
+import org.example.domain.plantChangeLog.PlantChangeLog;
 import org.example.domain.plantbatch.PlantBatch;
 import lombok.RequiredArgsConstructor;
 import org.example.exception.PlantBatchNotFoundException;
 import org.example.exception.PlantNotFoundException;
+import org.example.repository.PlantChangeLogRepository;
 import org.springframework.stereotype.Service;
 import org.example.repository.PlantBatchRepository;
 import org.example.repository.PlantRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,6 +25,7 @@ public class ProductionApplicationService {
     private final PlantRepository plantRepository;
     private final PlantBatchRepository plantBatchRepository;
     private final InventoryServiceClient inventoryServiceClient;
+    private final PlantChangeLogRepository plantChangeLogRepository;
 
     public List<Plant> getAllPlants(){
 
@@ -38,7 +43,20 @@ public class ProductionApplicationService {
                 .orElseThrow(() -> new RuntimeException("Can not create plant with non existent Plant Batch"));
 
         plantBatch.incrementTotalCount(1);
-        return plantRepository.save(plant);
+
+        Plant saved = plantRepository.save(plant);
+
+        plantChangeLogRepository.save(
+                PlantChangeLog.builder()
+                        .plantId(saved.getId())
+                        .batchId(saved.getBatchId())
+                        .quantityChange(1)
+                        .changeType(ChangeType.CREATE)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        );
+
+        return saved;
     }
 
     @Transactional
@@ -52,8 +70,52 @@ public class ProductionApplicationService {
                     .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
 
             prevPlantBatch.decrementTotalCount(1);
+
+            if(existing.isHealthy())
+                plantChangeLogRepository.save(
+                        PlantChangeLog.builder()
+                                .plantId(existing.getId())
+                                .batchId(prevPlantBatch.getId())
+                                .quantityChange(-1)
+                                .changeType(ChangeType.UPDATE)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                );
+
             newPlantBatch.incrementTotalCount(1);
+
+            if(plant.isHealthy())
+                plantChangeLogRepository.save(
+                        PlantChangeLog.builder()
+                                .plantId(existing.getId())
+                                .batchId(newPlantBatch.getId())
+                                .quantityChange(1)
+                                .changeType(ChangeType.UPDATE)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                );
         }
+        if(existing.isHealthy() && !plant.isHealthy())
+            if(plant.isHealthy())
+                plantChangeLogRepository.save(
+                        PlantChangeLog.builder()
+                                .plantId(existing.getId())
+                                .batchId(existing.getBatchId())
+                                .quantityChange(-1)
+                                .changeType(ChangeType.DISEASE)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                );
+        else if(!existing.isHealthy() && plant.isHealthy())
+                plantChangeLogRepository.save(
+                        PlantChangeLog.builder()
+                                .plantId(existing.getId())
+                                .batchId(existing.getBatchId())
+                                .quantityChange(1)
+                                .changeType(ChangeType.DISEASE)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                );
 
         existing.copy(plant);
         return plantRepository.save(existing);
@@ -67,6 +129,17 @@ public class ProductionApplicationService {
                 .orElseThrow(() -> new PlantBatchNotFoundException());
 
         plantBatch.decrementTotalCount(1);
+
+        plantChangeLogRepository.save(
+                PlantChangeLog.builder()
+                        .plantId(plant.getId())
+                        .batchId(plant.getBatchId())
+                        .quantityChange(-1)
+                        .changeType(ChangeType.DELETE)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        );
+
         plantRepository.deleteById(id);
     }
 
