@@ -113,6 +113,7 @@ public class ProductionApplicationService {
         return plantBatchRepository.save(plantBatch);
     }
 
+    @Transactional
     public List<Long> findHealthyPlantIds(String plantName,
                                           PlantType plantType,
                                           Integer plantAge) {
