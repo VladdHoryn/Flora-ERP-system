@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.application.*;
+import org.example.application.ProductionApplicationService;
 import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import lombok.RequiredArgsConstructor;

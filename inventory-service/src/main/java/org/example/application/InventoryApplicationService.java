@@ -81,7 +81,7 @@ public class InventoryApplicationService {
                     Math.toIntExact(plant.plantAge())
             );
 
-            List<Long> plantIds = productionServiceClient.findHealthyPlantIds(
+            List<Long> plantIds = productionServiceClient.findHealthyPlantIds( //Дописати
                     plant.plantType(),
                     plant.plantName(),
                     Math.toIntExact(plant.plantAge())
