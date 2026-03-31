@@ -9,9 +9,12 @@ import org.example.application.ProductionApplicationService;
 import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.plantChangeLog.PlantChangeLog;
 import org.example.domain.plantbatch.PlantBatch;
+import org.example.repository.PlantChangeLogRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,6 +24,7 @@ import java.util.List;
 public class ProductionController {
 
     private final ProductionApplicationService productionApplicationService;
+    private final PlantChangeLogRepository plantChangeLogRepository;
 
     // ---------------- PLANTS ----------------
 
@@ -159,5 +163,12 @@ public class ProductionController {
             @RequestParam Integer plantAge
     ) {
         return productionApplicationService.findHealthyPlantIds(plantName, plantType, plantAge);
+    }
+
+    @GetMapping("/plants/changes")
+    public List<PlantChangeLog> getPlantChanges(@RequestParam("since") String since){
+        LocalDateTime lastCheck = LocalDateTime.parse(since);
+
+        return plantChangeLogRepository.findByCreatedAtAfter(lastCheck);
     }
 }
