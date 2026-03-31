@@ -43,11 +43,7 @@ public class ProductionServiceClient {
 
     public List<PlantChangeDTO> getChanges(LocalDateTime since){
         return restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(productionUrl + "/plants/changes")
-                        .queryParam("since", since.toString())
-                        .build()
-                )
+                .uri(productionUrl + "/production/v1/plants/changes?since=" + since)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<PlantChangeDTO>>() {});
     }

@@ -8,7 +8,6 @@ import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class InventoryServiceClient {
     private final RestClient restClient;
 
