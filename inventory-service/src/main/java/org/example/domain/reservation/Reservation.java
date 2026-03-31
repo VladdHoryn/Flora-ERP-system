@@ -25,7 +25,7 @@ public class Reservation {
     public Reservation(){
         status = ReservationStatus.CREATED;
         createdAt = LocalDateTime.now();
-        expiresAt = LocalDateTime.now().plusHours(1);
+        expiresAt = LocalDateTime.now().plusDays(1);
     }
 
     public void confirm(){

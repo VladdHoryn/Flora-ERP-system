@@ -3,11 +3,13 @@ package org.example.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.inventory.PlantType;
+import org.example.dto.PlantChangeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -37,5 +39,12 @@ public class ProductionServiceClient {
                         .build())
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<Long>>() {});
+    }
+
+    public List<PlantChangeDTO> getChanges(LocalDateTime since){
+        return restClient.get()
+                .uri(productionUrl + "/production/v1/plants/changes?since=" + since)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<PlantChangeDTO>>() {});
     }
 }

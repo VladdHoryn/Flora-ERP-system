@@ -3,11 +3,14 @@ package org.example.application;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.config.ProductionServiceClient;
 import org.example.domain.PlantAvailability;
 import org.example.domain.inventory.PlantInventory;
 import org.example.domain.inventory.PlantType;
 import org.example.domain.reservation.Reservation;
+import org.example.dto.PlantChangeDTO;
 import org.example.dto.PlantData;
 import org.example.exception.InventoryNotFoundException;
 import org.example.exception.PlantAvailabilityNotFoundException;
@@ -15,18 +18,32 @@ import org.example.exception.ReservationNotFoundException;
 import org.example.repository.PlantAvailabilityRepository;
 import org.example.repository.PlantInventoryRepository;
 import org.example.repository.ReservationRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@Slf4j
 public class InventoryApplicationService {
     private final PlantInventoryRepository plantInventoryRepository;
     private final ReservationRepository reservationRepository;
     private final PlantAvailabilityRepository plantAvailabilityRepository;
     private final ProductionServiceClient productionServiceClient;
+
+    private LocalDateTime lastCheck;
+
+    public InventoryApplicationService(PlantInventoryRepository plantInventoryRepository,
+                                       ReservationRepository reservationRepository,
+                                       PlantAvailabilityRepository plantAvailabilityRepository,
+                                       ProductionServiceClient productionServiceClient){
+        this.plantInventoryRepository = plantInventoryRepository;
+        this.reservationRepository = reservationRepository;
+        this.plantAvailabilityRepository = plantAvailabilityRepository;
+        this.productionServiceClient = productionServiceClient;
+        lastCheck = LocalDateTime.now().minusMinutes(1);
+    }
 
     public List<PlantInventory> getAllInventories() {
         return plantInventoryRepository.findAll();
@@ -64,6 +81,37 @@ public class InventoryApplicationService {
         return plantInventoryRepository
                 .findByPlantTypeAndPlantsNameAndAge(plantType, plantName, plantAge.longValue())
                 .orElseThrow(() -> new InventoryNotFoundException());
+    }
+
+    @Transactional
+    public PlantInventory findInventoryByPlantTypeAndPlantsNameAndAge(
+            PlantType plantType,
+            String plantsName,
+            Long age
+    ){
+        return plantInventoryRepository.findByPlantTypeAndPlantsNameAndAge(plantType, plantsName, age).orElse(
+                this.createInventory(new PlantInventory(plantType, plantsName, age))
+        );
+    }
+
+    @Transactional
+    public PlantInventory changeTotalQuantity(Long id, Long totalChanged){
+        PlantInventory inventory = plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PlantInventory not found"));
+
+        inventory.setTotalQuantity(inventory.getTotalQuantity() + totalChanged);
+
+        return plantInventoryRepository.save(inventory);
+    }
+
+    @Transactional
+    public PlantInventory changeAvailableQuantity(Long id, Long availableChanged){
+        PlantInventory inventory = plantInventoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PlantInventory not found"));
+
+        inventory.setAvailableQuantity(inventory.getAvailableQuantity() + availableChanged);
+
+        return plantInventoryRepository.save(inventory);
     }
 
     // ---------------- RESERVATIONS ----------------
@@ -173,6 +221,44 @@ public class InventoryApplicationService {
             }
 
             reservationRepository.save(reservation);
+        }
+    }
+
+    @Scheduled(fixedRate = 6000) //Дописати з врахування захворювання і тп зарезервованої рослини
+    public void fetchPlantChanges(){
+        log.info("fetching plant changes");
+        List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
+        lastCheck = LocalDateTime.now();
+
+        for (PlantChangeDTO change : changes){ //Дописати
+            PlantInventory inventory = this.findInventoryByPlantTypeAndPlantsNameAndAge(change.getPlantType(), change.getPlantsName(), change.getAge());
+
+            if(change.getChangeType().equals("CREATE")){
+                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() + "\nBecause of CREATE\nChanged plant id: " + change.getPlantId());
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("UPDATE")){
+                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
+                        "\nBecause of UPDATE\nChanged plant id: " + change.getPlantId());
+
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("DELETE")){
+                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
+                        "\nBecause of DELETE\nChanged plant id: " + change.getPlantId());
+
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
+            else if(change.getChangeType().equals("DISEASE")){
+                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
+                        "\nBecause of DISEASE\nChanged plant id: " + change.getPlantId());
+
+                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+            }
         }
     }
 }
