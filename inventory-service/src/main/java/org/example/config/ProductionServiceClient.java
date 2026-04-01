@@ -57,28 +57,30 @@ public class ProductionServiceClient {
                 .body(new ParameterizedTypeReference<List<PlantChangeDTO>>() {});
     }
 
-    private void findHealthyFallback(PlantType plantType,
+    private List<Long> findHealthyFallback(PlantType plantType,
                                      String plantName,
                                      Integer plantAge,
                                      Throwable throwable){
         log.warn("findHealthyFallback triggered for plantType={} plantName={}, plantAge={}, ex={} ",
                 plantType, plantName, plantAge, throwable.toString());
 
-        throw new ResponseStatusException(
-                HttpStatus.I_AM_A_TEAPOT,
-                "production-service unavailable (findHealthyPlants failed)",
-                throwable
-        );
+//        throw new ResponseStatusException(
+//                HttpStatus.SERVICE_UNAVAILABLE,
+//                "production-service unavailable (findHealthyPlants failed)",
+//                throwable
+//        );
+        return List.of();
     }
 
-    private void getChangesFallback(LocalDateTime since, Throwable throwable){
+    private List<PlantChangeDTO> getChangesFallback(LocalDateTime since, Throwable throwable){
         log.warn("getChangesFallback triggered for since={}, ex={} ",
                 since, throwable.toString());
 
-        throw new ResponseStatusException(
-                HttpStatus.I_AM_A_TEAPOT,
-                "production-service unavailable (getChanges failed)",
-                throwable
-        );
+//        throw new ResponseStatusException(
+//                HttpStatus.SERVICE_UNAVAILABLE,
+//                "production-service unavailable (getChanges failed)",
+//                throwable
+//        );
+        return List.of();
     }
 }

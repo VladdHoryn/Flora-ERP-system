@@ -24,17 +24,17 @@ production-service:
 
 resilience4j:
   retry:
-    instance:
+    instances:
       productionService:
         max-attempts: 3
         wait-duration: 200ms
-        retry-exeptions:
+        retry-exceptions:
           - org.springframework.web.client.ResourceAccessException
           - org.springframework.web.client.HttpServerErrorException
         ignore-exceptions:
           - org.springframework.web.client.HttpClientErrorException
   circuitbreaker:
-    instance:
+    instances:
       productionService:
         sliding-window-type: count_based
         sliding-window-size: 20
