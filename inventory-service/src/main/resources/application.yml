@@ -31,8 +31,10 @@ resilience4j:
         retry-exceptions:
           - org.springframework.web.client.ResourceAccessException
           - org.springframework.web.client.HttpServerErrorException
+          - java.lang.Exception
         ignore-exceptions:
           - org.springframework.web.client.HttpClientErrorException
+    retry-aspect-order: 2
   circuitbreaker:
     instances:
       productionService:
@@ -45,6 +47,7 @@ resilience4j:
         record-exceptions:
           - org.springframework.web.client.ResourceAccessException
           - org.springframework.web.client.HttpServerErrorException
+    circuit-breaker-aspect-order: 1
 
 logging:
   pattern:
@@ -52,3 +55,4 @@ logging:
   level:
     org.springframework.jdbc.datasource: DEBUG
     org.hibernate.engine.jdbc.env.internal: DEBUG
+    io.github.resilience4j.retry: DEBUG

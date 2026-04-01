@@ -51,6 +51,8 @@ public class ProductionServiceClient {
     @Retry(name = "productionService", fallbackMethod = "getChangesFallback")
     @CircuitBreaker(name = "productionService", fallbackMethod = "getChangesFallback")
     public List<PlantChangeDTO> getChanges(LocalDateTime since){
+        log.info("CALLING production-service...");
+
         return restClient.get()
                 .uri(productionUrl + "/production/v1/plants/changes?since=" + since)
                 .retrieve()

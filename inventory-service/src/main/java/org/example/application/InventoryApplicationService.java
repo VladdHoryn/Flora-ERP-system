@@ -224,7 +224,7 @@ public class InventoryApplicationService {
         }
     }
 
-    @Scheduled(fixedRate = 6000) //Дописати з врахування захворювання і тп зарезервованої рослини
+    @Scheduled(fixedRate = 60000) //Дописати з врахування захворювання і тп зарезервованої рослини
     public void fetchPlantChanges(){
         log.info("fetching plant changes");
         List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
