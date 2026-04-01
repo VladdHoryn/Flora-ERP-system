@@ -23,5 +23,8 @@ production-service:
     production-path: ${PRODUCTION_BASE_URL:http://localhost:8081}
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%X{correlationId}] %logger{36} : %msg%n"
   level:
-    root: INFO
+    org.springframework.jdbc.datasource: DEBUG
+    org.hibernate.engine.jdbc.env.internal: DEBUG
