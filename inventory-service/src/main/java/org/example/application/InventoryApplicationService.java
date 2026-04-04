@@ -2,12 +2,9 @@ package org.example.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.config.ProductionServiceClient;
+import org.example.infrastructure.config.ProductionServiceClient;
 import org.example.domain.OutboxEvent;
 import org.example.domain.PlantAvailability;
 import org.example.domain.inventory.PlantInventory;
