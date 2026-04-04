@@ -2,13 +2,12 @@ package org.example.application;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.example.config.InventoryServiceClient;
+import org.example.infrastructure.config.InventoryServiceClient;
 import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
 import org.example.domain.plantChangeLog.ChangeType;
 import org.example.domain.plantChangeLog.PlantChangeLog;
 import org.example.domain.plantbatch.PlantBatch;
-import lombok.RequiredArgsConstructor;
 import org.example.exception.PlantBatchNotFoundException;
 import org.example.exception.PlantNotFoundException;
 import org.example.repository.PlantChangeLogRepository;

@@ -1,4 +1,4 @@
-package org.example.config;
+package org.example.infrastructure.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
