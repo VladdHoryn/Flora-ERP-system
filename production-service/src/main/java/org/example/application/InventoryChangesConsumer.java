@@ -16,7 +16,7 @@ public class InventoryChangesConsumer {
     private final ObjectMapper objectMapper;
     private final ProductionApplicationService productionApplicationService;
 
-    @RabbitListener(queues = RabbitConfig.INVENTORY_CHANGES_QUEUE)
+//    @RabbitListener(queues = RabbitConfig.INVENTORY_CHANGES_QUEUE)
     public void consume(String message){
         try{
 

@@ -1,7 +1,11 @@
 package org.example.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.domain.OutboxEvent;
 import org.example.infrastructure.config.InventoryServiceClient;
 import org.example.domain.PlantType;
 import org.example.domain.plant.Plant;
@@ -10,6 +14,7 @@ import org.example.domain.plantChangeLog.PlantChangeLog;
 import org.example.domain.plantbatch.PlantBatch;
 import org.example.exception.PlantBatchNotFoundException;
 import org.example.exception.PlantNotFoundException;
+import org.example.repository.OutboxEventRepository;
 import org.example.repository.PlantChangeLogRepository;
 import org.springframework.stereotype.Service;
 import org.example.repository.PlantBatchRepository;
@@ -17,7 +22,9 @@ import org.example.repository.PlantRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ProductionApplicationService {
@@ -25,6 +32,8 @@ public class ProductionApplicationService {
     private final PlantBatchRepository plantBatchRepository;
     private final InventoryServiceClient inventoryServiceClient;
     private final PlantChangeLogRepository plantChangeLogRepository;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
 
     public List<Plant> getAllPlants(){
 
@@ -45,16 +54,13 @@ public class ProductionApplicationService {
 
         Plant saved = plantRepository.save(plant);
 
-        plantChangeLogRepository.save(
-                PlantChangeLog.builder()
-                        .plantId(saved.getId())
-                        .batchId(saved.getBatchId())
-                        .quantityChange(1)
-                        .changeType(ChangeType.CREATE)
-                        .createdAt(LocalDateTime.now())
-                        .build()
-        );
-
+        createOutboxEventForChange(PlantChangeLog.builder()
+                .plantId(saved.getId())
+                .batchId(saved.getBatchId())
+                .quantityChange(1)
+                .changeType(ChangeType.CREATE)
+                .createdAt(LocalDateTime.now())
+                .build());
         return saved;
     }
 
@@ -71,20 +77,18 @@ public class ProductionApplicationService {
             prevPlantBatch.decrementTotalCount(1);
 
             if(existing.isHealthy())
-                plantChangeLogRepository.save(
-                        PlantChangeLog.builder()
+                createOutboxEventForChange(PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(prevPlantBatch.getId())
                                 .quantityChange(-1)
                                 .changeType(ChangeType.UPDATE)
                                 .createdAt(LocalDateTime.now())
-                                .build()
-                );
+                                .build());
 
             newPlantBatch.incrementTotalCount(1);
 
             if(plant.isHealthy())
-                plantChangeLogRepository.save(
+                createOutboxEventForChange(
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(newPlantBatch.getId())
@@ -96,7 +100,7 @@ public class ProductionApplicationService {
         }
         if(existing.isHealthy() && !plant.isHealthy())
             if(plant.isHealthy())
-                plantChangeLogRepository.save(
+                createOutboxEventForChange(
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(existing.getBatchId())
@@ -106,7 +110,7 @@ public class ProductionApplicationService {
                                 .build()
                 );
         else if(!existing.isHealthy() && plant.isHealthy())
-                plantChangeLogRepository.save(
+                createOutboxEventForChange(
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(existing.getBatchId())
@@ -129,7 +133,7 @@ public class ProductionApplicationService {
 
         plantBatch.decrementTotalCount(1);
 
-        plantChangeLogRepository.save(
+        createOutboxEventForChange(
                 PlantChangeLog.builder()
                         .plantId(plant.getId())
                         .batchId(plant.getBatchId())
@@ -198,5 +202,22 @@ public class ProductionApplicationService {
                 .filter(Plant::isHealthy)
                 .map(Plant::getId)
                 .toList();
+    }
+
+    @Transactional
+    public void createOutboxEventForChange(PlantChangeLog plantChangeLog) {
+        try {
+            String payloadJson = objectMapper.writeValueAsString(plantChangeLog);
+
+            OutboxEvent event = new OutboxEvent(
+                    "PRODUCTION",
+                    UUID.randomUUID().toString(),
+                    "PLANT_CHANGE",
+                    payloadJson
+            );
+            outboxEventRepository.save(event);
+        } catch (JsonProcessingException e){
+            log.error("Failed to create event for plant change id: {}", plantChangeLog.getPlantId());
+        }
     }
 }
