@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.application.event.PlantChangeLogPayload;
 import org.example.infrastructure.config.ProductionServiceClient;
 import org.example.domain.OutboxEvent;
 import org.example.domain.PlantAvailability;
@@ -232,17 +233,17 @@ public class InventoryApplicationService {
         }
     }
 
-    @Scheduled(fixedRate = 60000) //Дописати з врахування захворювання і тп зарезервованої рослини
+//    @Scheduled(fixedRate = 60000) //Дописати з врахування захворювання і тп зарезервованої рослини
     @Transactional
-    public void fetchPlantChanges() {
+    public void fetchPlantChanges(PlantChangeLogPayload change) {
         try {
             log.info("fetching plant changes");
-            List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
-            lastCheck = LocalDateTime.now();
-            for (PlantChangeDTO change : changes) {
-                PlantInventory inventory = this.findInventoryByPlantTypeAndPlantsNameAndAge(change.getPlantType(), change.getPlantsName(), change.getAge());
-                applyChange(inventory, change); //Дописати
-            }
+//            List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
+//            lastCheck = LocalDateTime.now();
+
+            PlantInventory inventory = this.findInventoryByPlantTypeAndPlantsNameAndAge(change.plantType(), change.plantsName(), change.age());
+            applyChange(inventory, change); //Дописати
+
 
 //            createOutboxEventForChanges(changes);
         } catch (Exception e) {
@@ -251,33 +252,34 @@ public class InventoryApplicationService {
     }
 
     @Transactional
-    protected void applyChange(PlantInventory inventory, PlantChangeDTO change){ //Дописати
-        switch (change.getChangeType()) {
+    protected void applyChange(PlantInventory inventory, PlantChangeLogPayload change){ //Дописати
+        switch (change.changeType().toString()) {
             case "CREATE" -> {
-                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() + "\nBecause of CREATE\nChanged plant id: " + change.getPlantId());
-                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
-                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+                log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
+                        "\nBecause of CREATE\nChanged plant id: " + change.plantId());
+                this.changeTotalQuantity(inventory.getId(), (long) change.quantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.quantityChange());
             }
             case "UPDATE" -> {
                 log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
-                        "\nBecause of UPDATE\nChanged plant id: " + change.getPlantId());
+                        "\nBecause of UPDATE\nChanged plant id: " + change.plantId());
 
-                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
-                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeTotalQuantity(inventory.getId(), (long) change.quantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.quantityChange());
             }
             case "DELETE" -> {
                 log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
-                        "\nBecause of DELETE\nChanged plant id: " + change.getPlantId());
+                        "\nBecause of DELETE\nChanged plant id: " + change.plantId());
 
-                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
-                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeTotalQuantity(inventory.getId(), (long) change.quantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.quantityChange());
             }
             case "DISEASE" -> {
                 log.info("changing TotalQuantity and AvailableQuantity of inventory: " + inventory.getId() +
-                        "\nBecause of DISEASE\nChanged plant id: " + change.getPlantId());
+                        "\nBecause of DISEASE\nChanged plant id: " + change.plantId());
 
-                this.changeTotalQuantity(inventory.getId(), (long) change.getQuantityChange());
-                this.changeAvailableQuantity(inventory.getId(), (long) change.getQuantityChange());
+                this.changeTotalQuantity(inventory.getId(), (long) change.quantityChange());
+                this.changeAvailableQuantity(inventory.getId(), (long) change.quantityChange());
             }
         }
     }
