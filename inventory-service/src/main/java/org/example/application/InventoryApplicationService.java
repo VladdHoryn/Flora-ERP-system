@@ -244,7 +244,7 @@ public class InventoryApplicationService {
                 applyChange(inventory, change); //Дописати
             }
 
-            createOutboxEventForChanges(changes);
+//            createOutboxEventForChanges(changes);
         } catch (Exception e) {
             log.warn("fetching plant changes FAILED");
         }
@@ -282,17 +282,17 @@ public class InventoryApplicationService {
         }
     }
 
-    private void createOutboxEventForChanges(List<PlantChangeDTO> changes) throws JsonProcessingException {
-        if (!changes.isEmpty()) {
-            String payloadJson = objectMapper.writeValueAsString(changes);
-
-            OutboxEvent event = new OutboxEvent(
-                    "INVENTORY",
-                    UUID.randomUUID().toString(),
-                    "PLANT_CHANGES",
-                    payloadJson
-            );
-            outboxEventRepository.save(event);
-        }
-    }
+//    private void createOutboxEventForChanges(List<PlantChangeDTO> changes) throws JsonProcessingException {
+//        if (!changes.isEmpty()) {
+//            String payloadJson = objectMapper.writeValueAsString(changes);
+//
+//            OutboxEvent event = new OutboxEvent(
+//                    "INVENTORY",
+//                    UUID.randomUUID().toString(),
+//                    "PLANT_CHANGES",
+//                    payloadJson
+//            );
+//            outboxEventRepository.save(event);
+//        }
+//    }
 }
