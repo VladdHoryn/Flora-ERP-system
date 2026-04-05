@@ -8,10 +8,24 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-    public static final String INVENTORY_CHANGES_QUEUE = "inventory.changes.queue";
+    public static final String  PRODUCTION_EXCHANGE = "production.exchange";
+    public static final String PRODUCTION_CHANGES_QUEUE = "production.changes.queue";
+    public static final String PRODUCTION_CHANGES_ROUTING_KEY = "production.changes";
 
     @Bean
-    public Queue inventoryChangesQueue(){
-        return new Queue(INVENTORY_CHANGES_QUEUE);
+    public TopicExchange productionExchange(){
+        return new TopicExchange(PRODUCTION_EXCHANGE);
+    }
+
+    @Bean
+    public Queue productionChangesQueue(){
+        return new Queue(PRODUCTION_CHANGES_QUEUE);
+    }
+
+    public Binding productionChangesBinding(){
+        return BindingBuilder
+                .bind(productionChangesQueue())
+                .to(productionExchange())
+                .with(PRODUCTION_CHANGES_ROUTING_KEY);
     }
 }
