@@ -216,6 +216,8 @@ public class ProductionApplicationService {
                     payloadJson
             );
             outboxEventRepository.save(event);
+
+            log.info("Create event for plant change: {}", payloadJson);
         } catch (JsonProcessingException e){
             log.error("Failed to create event for plant change id: {}", plantChangeLog.getPlantId());
         }

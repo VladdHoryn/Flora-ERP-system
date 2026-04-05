@@ -22,6 +22,7 @@ public class RabbitConfig {
         return new Queue(PRODUCTION_CHANGES_QUEUE);
     }
 
+    @Bean
     public Binding productionChangesBinding(){
         return BindingBuilder
                 .bind(productionChangesQueue())

@@ -24,7 +24,7 @@ public class OutboxRelayService {
     public void relay(){
         log.info("Sending outbox events");
         List<OutboxEvent> events = outboxEventRepository.findTop20ByStatusOrderByCreatedAtAsc("NEW");
-        events.addAll(outboxEventRepository.findTop20ByStatusOrderByCreatedAtAsc("FAILed"));
+        events.addAll(outboxEventRepository.findTop20ByStatusOrderByCreatedAtAsc("FAILED"));
 
         for(var event : events){
             log.info("Obtained outbox event {}", event.getEventId());
