@@ -98,9 +98,8 @@ public class InventoryApplicationService {
             String plantsName,
             Long age
     ) {
-        return plantInventoryRepository.findByPlantTypeAndPlantsNameAndAge(plantType, plantsName, age).orElse(
-                this.createInventory(new PlantInventory(plantType, plantsName, age))
-        );
+        return plantInventoryRepository.findByPlantTypeAndPlantsNameAndAge(plantType, plantsName, age).orElseThrow(() ->
+                new InventoryNotFoundException());
     }
 
     @Transactional
@@ -238,14 +237,10 @@ public class InventoryApplicationService {
     public void fetchPlantChanges(PlantChangeLogPayload change) {
         try {
             log.info("fetching plant changes");
-//            List<PlantChangeDTO> changes = productionServiceClient.getChanges(lastCheck);
-//            lastCheck = LocalDateTime.now();
 
             PlantInventory inventory = this.findInventoryByPlantTypeAndPlantsNameAndAge(change.plantType(), change.plantsName(), change.age());
             applyChange(inventory, change); //Дописати
 
-
-//            createOutboxEventForChanges(changes);
         } catch (Exception e) {
             log.warn("fetching plant changes FAILED");
         }

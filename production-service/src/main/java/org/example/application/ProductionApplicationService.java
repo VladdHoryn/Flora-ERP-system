@@ -57,6 +57,9 @@ public class ProductionApplicationService {
         createOutboxEventForChange(PlantChangeLog.builder()
                 .plantId(saved.getId())
                 .batchId(saved.getBatchId())
+                .plantType(saved.getPlantType())
+                .plantsName(saved.getName())
+                .age(plantBatch.getAgeInMonths())
                 .quantityChange(1)
                 .changeType(ChangeType.CREATE)
                 .createdAt(LocalDateTime.now())
@@ -67,12 +70,13 @@ public class ProductionApplicationService {
     @Transactional
     public Plant updatePlant(Long id, Plant plant){
         Plant existing = getPlantById(id);
+        PlantBatch prevPlantBatch = plantBatchRepository.findById(existing.getBatchId())
+                .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
+        PlantBatch newPlantBatch = plantBatchRepository.findById(plant.getBatchId())
+                .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
 
         if(existing.getBatchId() != plant.getBatchId()){
-            PlantBatch prevPlantBatch = plantBatchRepository.findById(existing.getBatchId())
-                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
-            PlantBatch newPlantBatch = plantBatchRepository.findById(plant.getBatchId())
-                    .orElseThrow(() -> new PlantBatchNotFoundException(existing.getBatchId()));
+
 
             prevPlantBatch.decrementTotalCount(1);
 
@@ -80,6 +84,9 @@ public class ProductionApplicationService {
                 createOutboxEventForChange(PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(prevPlantBatch.getId())
+                        .plantType(existing.getPlantType())
+                        .plantsName(existing.getName())
+                        .age(prevPlantBatch.getAgeInMonths())
                                 .quantityChange(-1)
                                 .changeType(ChangeType.UPDATE)
                                 .createdAt(LocalDateTime.now())
@@ -92,6 +99,9 @@ public class ProductionApplicationService {
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(newPlantBatch.getId())
+                                .plantType(existing.getPlantType())
+                                .plantsName(existing.getName())
+                                .age(newPlantBatch.getAgeInMonths())
                                 .quantityChange(1)
                                 .changeType(ChangeType.UPDATE)
                                 .createdAt(LocalDateTime.now())
@@ -104,6 +114,9 @@ public class ProductionApplicationService {
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(existing.getBatchId())
+                                .plantType(existing.getPlantType())
+                                .plantsName(existing.getName())
+                                .age(prevPlantBatch.getAgeInMonths())
                                 .quantityChange(-1)
                                 .changeType(ChangeType.DISEASE)
                                 .createdAt(LocalDateTime.now())
@@ -114,6 +127,9 @@ public class ProductionApplicationService {
                         PlantChangeLog.builder()
                                 .plantId(existing.getId())
                                 .batchId(existing.getBatchId())
+                                .plantType(existing.getPlantType())
+                                .plantsName(existing.getName())
+                                .age(newPlantBatch.getAgeInMonths())
                                 .quantityChange(1)
                                 .changeType(ChangeType.DISEASE)
                                 .createdAt(LocalDateTime.now())
@@ -137,6 +153,9 @@ public class ProductionApplicationService {
                 PlantChangeLog.builder()
                         .plantId(plant.getId())
                         .batchId(plant.getBatchId())
+                        .plantType(plant.getPlantType())
+                        .plantsName(plant.getName())
+                        .age(plantBatch.getAgeInMonths())
                         .quantityChange(-1)
                         .changeType(ChangeType.DELETE)
                         .createdAt(LocalDateTime.now())
