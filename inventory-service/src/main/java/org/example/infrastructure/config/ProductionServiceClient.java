@@ -1,4 +1,4 @@
-package org.example.config;
+package org.example.infrastructure.config;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;

@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.example.domain.PlantType;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
@@ -70,5 +71,13 @@ public class PlantBatch {
         this.plantsName = plantBatch.plantsName;
         this.location = plantBatch.location;
         this.plantedAt = plantBatch.plantedAt;
+    }
+
+    public long getAgeInMonths() {
+        if (plantedAt == null) {
+            return 0; // або кинути exception
+        }
+
+        return ChronoUnit.MONTHS.between(plantedAt, LocalDate.now());
     }
 }
