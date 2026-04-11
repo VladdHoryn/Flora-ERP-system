@@ -1,4 +1,4 @@
-package domain.order;
+package org.example.domain.order;
 
 
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package domain.user;
+package org.example.domain.user;
 
 public enum UserRole {
     GUEST,
