@@ -1,11 +1,10 @@
 package org.example.application.event;
 
-import org.example.domain.inventory.PlantType;
-
+import org.example.domain.PlantType;
 import java.time.LocalDateTime;
 
 public record InventoryChangedPayload (
-    String id,
+    Long id,
     Long plantId,
     Long batchId,
 

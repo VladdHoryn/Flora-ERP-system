@@ -9,7 +9,7 @@ import org.example.domain.inventory.PlantType;
 import java.time.LocalDateTime;
 
 public record PlantChangeLogPayload(
-        Long id,
+        String id,
         Long plantId,
         Long batchId,
 
