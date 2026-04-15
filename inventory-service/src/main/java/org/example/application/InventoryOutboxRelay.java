@@ -48,8 +48,8 @@ public class InventoryOutboxRelay {
 
     private String resolveRoutingKey(String eventType){
         return switch (eventType){
-            case "PLANT_CHANGED" -> RabbitConfig.INVENTORY_CHANGED_ROUTING_KEY;
-            case "PLANT_CHANGE_FAILED" -> RabbitConfig.INVENTORY_CHANGE_FAILED_ROUTING_KEY;
+            case "INVENTORY_CHANGED" -> RabbitConfig.INVENTORY_CHANGED_ROUTING_KEY;
+            case "INVENTORY_CHANGE_FAILED" -> RabbitConfig.INVENTORY_CHANGE_FAILED_ROUTING_KEY;
             default -> throw new IllegalArgumentException("Unsupported event type: " + eventType);
         };
     }

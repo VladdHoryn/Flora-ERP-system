@@ -14,6 +14,7 @@ import org.example.repository.OutboxEventRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class InventorySagaService {
 
             saveOutboxEvent(
                     "INVENTORY",
-                    payload.id().toString(),
+                    UUID.randomUUID().toString(),
                     "INVENTORY_CHANGED",
                     eventPayload
             );
@@ -63,7 +64,7 @@ public class InventorySagaService {
 
             saveOutboxEvent(
                     "INVENTORY",
-                    payload.id().toString(),
+                    UUID.randomUUID().toString(),
                     "INVENTORY_CHANGE_FAILED",
                     eventPayload
             );
