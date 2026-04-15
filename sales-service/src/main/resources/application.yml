@@ -54,3 +54,8 @@ logging:
     org.hibernate.engine.jdbc.env.internal: DEBUG
     io.github.resilience4j.retry: DEBUG
 #  level: "%5p [${spring.application.name:},%X{correlationId}]"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

@@ -68,3 +68,8 @@ logging:
   level:
     org.springframework.jdbc.datasource: DEBUG
     org.hibernate.engine.jdbc.env.internal: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

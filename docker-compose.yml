@@ -11,3 +11,19 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
 #    volumes:
 #      - rabbitmq_data:/var/lib/rabbitmq
+  eureka-service:
+    build: ./eureka-service
+    ports:
+      - "8761:8761"
+  production-service:
+    build: ./production-service
+    depends_on:
+      - eureka-service
+  inventory-service:
+    build: ./inventory-service
+    depends_on:
+      - eureka-service
+  sales-service:
+    build: ./sales-service
+    depends_on:
+      - eureka-service
