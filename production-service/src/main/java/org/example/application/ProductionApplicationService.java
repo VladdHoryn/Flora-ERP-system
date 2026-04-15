@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.application.event.InventoryChangeApproved;
 import org.example.domain.OutboxEvent;
 import org.example.infrastructure.config.InventoryServiceClient;
 import org.example.domain.PlantType;
@@ -21,6 +22,7 @@ import org.example.repository.PlantBatchRepository;
 import org.example.repository.PlantRepository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -239,6 +241,42 @@ public class ProductionApplicationService {
             log.info("Create event for plant change: {}", payloadJson);
         } catch (JsonProcessingException e){
             log.error("Failed to create event for plant change id: {}", plantChangeLog.getPlantId());
+        }
+    }
+
+    @Transactional
+    public void approveInventoryChanged(Long plantId){
+        InventoryChangeApproved payload = new InventoryChangeApproved(
+                UUID.randomUUID().toString(),
+                plantId,
+                LocalDateTime.now()
+        );
+
+        saveOutboxEvent(
+                "PRODUCTION",
+                UUID.randomUUID().toString(),
+                "PLANT_CHANGE_APPROVED",
+                payload
+        );
+    }
+
+    private void saveOutboxEvent(String aggregateType,
+                                 String aggregateId,
+                                 String eventType,
+                                 Object payload) {
+        try {
+            String payloadJson = objectMapper.writeValueAsString(payload);
+
+            OutboxEvent outboxEvent = new OutboxEvent(
+                    aggregateType,
+                    aggregateId,
+                    eventType,
+                    payloadJson
+            );
+
+            outboxEventRepository.save(outboxEvent);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize outbox payload", e);
         }
     }
 }
