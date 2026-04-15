@@ -20,6 +20,7 @@
         <module>production-service</module>
         <module>inventory-service</module>
         <module>sales-service</module>
+        <module>eureka-service</module>
     </modules>
 
     <properties>
