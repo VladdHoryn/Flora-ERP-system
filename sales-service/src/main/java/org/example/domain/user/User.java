@@ -1,5 +1,7 @@
 package org.example.domain.user;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.example.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,6 +13,8 @@ import java.util.List;
 @Table(name = "user")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
