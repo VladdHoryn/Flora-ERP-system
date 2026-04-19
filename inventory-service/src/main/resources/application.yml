@@ -20,7 +20,7 @@ server:
 
 production-service:
     base-url: ${PRODUCTION_BASE_URL:http://productio-service:8081}
-    production-path: ${PRODUCTION_BASE_URL:http://localhost:8081}
+    production-path: ${PRODUCTION_BASE_URL:http://productio-service:8081}
 
 resilience4j:
   retry:

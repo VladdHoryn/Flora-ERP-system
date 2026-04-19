@@ -28,7 +28,7 @@ server:
 
 inventory-service:
   base-url: ${INVENTORY_BASE_URL:http://inventory-service:8082}
-  inventory-path: ${INVENTORY_BASE_URL:http://localhost:8082}
+  inventory-path: ${INVENTORY_BASE_URL:http://inventory-service:8082}
 
 management:
   endpoints:
