@@ -5,7 +5,7 @@ spring:
   datasource:
     username: ${DB_USERNAME:root}
     password: ${DB_USERNAME:12345}
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/sales_service_db}
+    url: ${DB_URL:jdbc:mariadb://sales-db:3306/sales_service_db}
 
     jpa:
       hibernate:
@@ -16,7 +16,7 @@ spring:
           format_sql: true
 
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${SERVER_PORT:8083}
 
 resilience4j:
   retry:
