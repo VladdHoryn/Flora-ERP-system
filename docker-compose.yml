@@ -10,9 +10,9 @@ services:
   #    volumes:
   #      - rabbitmq_data:/var/lib/rabbitmq
 
-  eureka-service:
+  eureka-server:
     build:
-      context: ./eureka-service
+      context: ./eureka-server
       dockerfile: Dockerfile
     container_name: eureka-server
     ports:
@@ -35,7 +35,7 @@ services:
     container_name: production_service
     depends_on:
       - production-db
-      - eureka-service
+      - eureka-server
     environment:
       DB_URL: jdbc:mariadb://production-db:3306/production_service_db
       DB_USERNAME: root
@@ -58,15 +58,15 @@ services:
     container_name: inventory-service
     depends_on:
       - inventory-db
-      - eureka-service
+      - eureka-server
     environment:
-      DB_URL: jdbc:mariadb://inventory-db:3306/production_service_db
+      DB_URL: jdbc:mariadb://inventory-db:3306/inventory_service_db
       DB_USERNAME: root
       DB_PASSWORD: 12345
-      PRODUCTION_BASE_URL: http://productio-service:8081
+      PRODUCTION_BASE_URL: http://production-service:8081
     ports:
       - "8082:8082"
 #  sales-service:
 #    build: ./sales-service
 #    depends_on:
-#      - eureka-service
+#      - eureka-server
