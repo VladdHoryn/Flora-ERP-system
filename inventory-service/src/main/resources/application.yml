@@ -4,8 +4,8 @@ spring:
 
   datasource:
     username: ${DB_USERNAME:root}
-    password: ${DB_USERNAME:12345}
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/inventory_service_db}
+    password: ${DB_PASSWORD:12345}
+    url: ${DB_URL:jdbc:mariadb://inventory-db:3306/inventory_service_db}
 
   jpa:
     hibernate:
@@ -19,8 +19,8 @@ server:
   port: ${SERVER_PORT:8082}
 
 production-service:
-    base-url: ${PRODUCTION_BASE_URL:http://localhost:8081}
-    production-path: ${PRODUCTION_BASE_URL:http://localhost:8081}
+    base-url: ${PRODUCTION_BASE_URL:http://production-service:8081}
+    production-path: ${PRODUCTION_BASE_URL:http://production-service:8081}
 
 resilience4j:
   retry:
@@ -58,3 +58,8 @@ logging:
     org.hibernate.engine.jdbc.env.internal: DEBUG
     io.github.resilience4j.retry: DEBUG
 #  level: "%5p [${spring.application.name:},%X{correlationId}]"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

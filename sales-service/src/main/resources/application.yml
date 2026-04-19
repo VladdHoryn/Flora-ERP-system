@@ -4,19 +4,19 @@ spring:
 
   datasource:
     username: ${DB_USERNAME:root}
-    password: ${DB_USERNAME:12345}
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/sales_service_db}
+    password: ${DB_PASSWORD:12345}
+    url: ${DB_URL:jdbc:mariadb://sales-db:3306/sales_service_db}
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
       hibernate:
-        ddl-auto: update
-      show-sql: true
-      properties:
-        hibernate:
-          format_sql: true
+        format_sql: true
 
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${SERVER_PORT:8083}
 
 resilience4j:
   retry:
@@ -54,3 +54,8 @@ logging:
     org.hibernate.engine.jdbc.env.internal: DEBUG
     io.github.resilience4j.retry: DEBUG
 #  level: "%5p [${spring.application.name:},%X{correlationId}]"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
