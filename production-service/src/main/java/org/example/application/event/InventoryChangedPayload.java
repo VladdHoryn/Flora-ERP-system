@@ -4,7 +4,7 @@ import org.example.domain.PlantType;
 import java.time.LocalDateTime;
 
 public record InventoryChangedPayload (
-    Long id,
+    String id,
     Long plantId,
     Long batchId,
 
