@@ -24,6 +24,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 12345
       MYSQL_DATABASE: production_service_db
+    volumes:
+      - ./mysql-data:/var/lib/mysql
 #    ports:
 #      - "3307:3306"
 
@@ -50,6 +52,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 12345
       MYSQL_DATABASE: inventory_service_db
+    volumes:
+      - ./mysql-data:/var/lib/mysql
 
   inventory-service:
     build:
@@ -73,6 +77,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 12345
       MYSQL_DATABASE: sales_service_db
+    volumes:
+      - ./mysql-data:/var/lib/mysql
 
   sales-service:
     build:
