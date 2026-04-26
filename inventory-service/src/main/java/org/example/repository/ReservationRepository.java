@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findByStatus(ReservationStatus status);
 
+    Reservation findFirstByUserId(Long userId);
+
     List<Reservation> findByStatusAndExpiresAtBefore(
             ReservationStatus status,
             LocalDateTime time

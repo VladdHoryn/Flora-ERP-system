@@ -1,7 +1,9 @@
 package org.example.application;
 
 import lombok.RequiredArgsConstructor;
+import org.example.dto.ReservationResponse;
 import org.example.dto.SalesDetailsResponse;
+import org.example.dto.SalesResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,7 +20,24 @@ public class SalesCompositionService {
     @Value("${services.inventory.base-url}")
     private String inventoryBaseUrl;
 
-    private Mono<SalesDetailsResponse> getSalesDetails(Long salesId){
-        return Mono<SalesDetailsResponse>
+    public Mono<SalesDetailsResponse> getSalesDetails(Long salesId){
+        Mono<SalesResponse> salesMono = webClient.get()
+                .uri(salesBaseUrl + "/sales/v1/users/{id}", salesId)
+                .retrieve()
+                .bodyToMono(SalesResponse.class);
+
+        return salesMono.flatMap(salesResponse -> {
+            Mono<ReservationResponse> reservationMono = webClient.get()
+                    .uri(inventoryBaseUrl + "/inventory/v1/{id}/user", salesResponse.getUserId())
+                    .retrieve()
+                    .bodyToMono(ReservationResponse.class);
+
+            return reservationMono.map(reservation -> SalesDetailsResponse.builder()
+                    .salesId(salesResponse.getSalesId())
+                    .userId(reservation.getUserId())
+                    .status(salesResponse.getStatus())
+                    .reservation(reservation)
+                    .build());
+        });
     }
 }

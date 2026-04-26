@@ -56,6 +56,11 @@ public class InventoryController {
         return inventoryApplicationService.getAllReservations();
     }
 
+    @GetMapping("/reservations/{id}/user")
+    public Reservation getReservationByUserId(@PathVariable Long userId){
+        return inventoryApplicationService.getReservationByUserId(userId);
+    }
+
     @PostMapping("/reservations")
     @Operation(summary = "Create a new plant reservation", description = "Reserves specified quantity of healthy plants")
     public Reservation createReservation(
