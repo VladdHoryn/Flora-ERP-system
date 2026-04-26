@@ -124,10 +124,15 @@ public class InventoryApplicationService {
 
     // ---------------- RESERVATIONS ----------------
 
+    public List<Reservation> getAllReservations(){
+        return reservationRepository.findAll();
+    }
+
     @Transactional
-    public Reservation createReservation(List<PlantData> plants) {
+    public Reservation createReservation(List<PlantData> plants, Long userId) {
 
         Reservation reservation = new Reservation();
+        reservation.setUserId(userId);
         reservationRepository.save(reservation);
 
         for (PlantData plant : plants) {
@@ -143,6 +148,8 @@ public class InventoryApplicationService {
                     Math.toIntExact(plant.plantAge())
             );
 
+            log.info("Plants found: {}", plantIds.toString());
+
             List<Long> availablePlantIds = plantIds.stream()
                     .filter(id -> plantAvailabilityRepository.findById(id)
                             .map(PlantAvailability::isAvailable)
@@ -150,13 +157,15 @@ public class InventoryApplicationService {
                     .limit(plant.quantity())
                     .toList();
 
-            if (availablePlantIds.size() < plant.quantity()) {
-                throw new RuntimeException("Not enough available plants for reservation");
-            }
+            log.info("Available plants found: " + availablePlantIds.toString());
 
-            for (Long plantId : availablePlantIds) {
-                addPlantToReservation(reservation.getId(), plantId);
-            }
+//            if (availablePlantIds.size() < plant.quantity()) {
+//                throw new RuntimeException("Not enough available plants for reservation");
+//            }
+//
+//            for (Long plantId : availablePlantIds) {
+//                addPlantToReservation(reservation.getId(), plantId);
+//            }
 
             inventory.reserve((long) plant.quantity());
             plantInventoryRepository.save(inventory);
