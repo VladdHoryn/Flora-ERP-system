@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS inventory_service_db;
+
 CREATE TABLE outbox_event (
                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
                               event_id VARCHAR(36) NOT NULL,
