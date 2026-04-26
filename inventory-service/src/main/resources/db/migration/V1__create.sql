@@ -1,21 +1,15 @@
 CREATE TABLE outbox_event (
                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
                               event_id VARCHAR(36) NOT NULL,
-
                               aggregate_type VARCHAR(255) NOT NULL,
                               aggregate_id VARCHAR(255) NOT NULL,
                               event_type VARCHAR(255) NOT NULL,
-
                               payload LONGTEXT NOT NULL,
-
                               status VARCHAR(20) NOT NULL,
-
                               created_at DATETIME(6) NOT NULL,
                               sent_at DATETIME(6) NULL,
-
                               CONSTRAINT uq_outbox_event_event_id UNIQUE (event_id)
-);
+) ENGINE=InnoDB;
 
 -- =====================================================
 -- PLANT_AVAILABILITY

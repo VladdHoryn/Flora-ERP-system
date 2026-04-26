@@ -15,11 +15,21 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    locations: classpath:db/migration
 
 server:
   port: ${SERVER_PORT:8082}
@@ -60,6 +70,7 @@ logging:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%X{correlationId}] %logger{36} : %msg%n"
 
   level:
+    org.flywaydb: DEBUG
     org.springframework.jdbc.datasource: DEBUG
     org.hibernate.engine.jdbc.env.internal: DEBUG
     io.github.resilience4j.retry: DEBUG

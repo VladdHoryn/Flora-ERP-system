@@ -29,6 +29,7 @@ spring:
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
+    locations: classpath:db/migration
 
 springdoc:
   api-docs:
