@@ -51,10 +51,18 @@ public class InventoryController {
 
     // ---------------- RESERVATIONS ----------------
 
+    @GetMapping("/reservations")
+    public List<Reservation> getAllReservations(){
+        return inventoryApplicationService.getAllReservations();
+    }
+
     @PostMapping("/reservations")
     @Operation(summary = "Create a new plant reservation", description = "Reserves specified quantity of healthy plants")
-    public Reservation createReservation(@Valid @RequestBody List<PlantData> plants) {
-        return inventoryApplicationService.createReservation(plants);
+    public Reservation createReservation(
+            @Valid @RequestBody List<PlantData> plants,
+            @RequestParam Long userId
+    ) {
+        return inventoryApplicationService.createReservation(plants, userId);
     }
 
     @PostMapping("/reservations/{reservationId}/plants/{plantId}")
