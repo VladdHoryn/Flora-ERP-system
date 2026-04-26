@@ -1,0 +1,45 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: production-service
+              uri: http://production-service:8081
+              predicates:
+                - Path=/production/v1/**
+
+            - id: inventory-service
+              uri: http://inventory-service:8082
+              predicates:
+                - Path=/inventory/v1/**
+
+            - id: sales-service
+              uri: http://sales-service:8083
+              predicates:
+                - Path=/sales/v1/**
+
+services:
+  production:
+    base-url: http://production-service:8081
+  inventory:
+    base-url: http://inventory-service:8082
+  sales:
+    base-url: http://sales-service:8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
