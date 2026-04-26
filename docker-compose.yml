@@ -7,8 +7,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-  #    volumes:
-  #      - rabbitmq_data:/var/lib/rabbitmq
+#      volumes:
+#        - rabbitmq_data:/var/lib/rabbitmq
 
   eureka-server:
     build:
@@ -19,7 +19,7 @@ services:
       - "8761:8761"
 
   production-db:
-    image: mariadb:11
+    image: mariadb:11.2
     container_name: production-db
     environment:
       MYSQL_ROOT_PASSWORD: 12345
@@ -34,7 +34,7 @@ services:
       context: ./production-service
       dockerfile: Dockerfile
     restart: always
-    container_name: production_service
+    container_name: production-service
     depends_on:
       - production-db
       - eureka-server
@@ -46,51 +46,51 @@ services:
     ports:
       - "8081:8081"
 
-  inventory-db:
-    image: mariadb:11
-    container_name: inventory-db
-    environment:
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: inventory_service_db
-    volumes:
-      - ./mysql-data:/var/lib/mysql
-
-  inventory-service:
-    build:
-      context: ./inventory-service
-      dockerfile: Dockerfile
-    container_name: inventory-service
-    depends_on:
-      - inventory-db
-      - eureka-server
-    environment:
-      DB_URL: jdbc:mariadb://inventory-db:3306/inventory_service_db
-      DB_USERNAME: root
-      DB_PASSWORD: 12345
-      PRODUCTION_BASE_URL: http://production-service:8081
-    ports:
-      - "8082:8082"
-
-  sales-db:
-    image: mariadb:11
-    container_name: sales-db
-    environment:
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: sales_service_db
-    volumes:
-      - ./mysql-data:/var/lib/mysql
-
-  sales-service:
-    build:
-      context: ./sales-service
-      dockerfile: Dockerfile
-    container_name: sales-service
-    environment:
-      DB_URL: jdbc:mariadb://sales-db:3306/sales_service_db
-      DB_USERNAME: root
-      DB_PASSWORD: 12345
-    depends_on:
-      - sales-db
-      - eureka-server
-    ports:
-      - "8083:8083"
+#  inventory-db:
+#    image: mariadb:11
+#    container_name: inventory-db
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 12345
+#      MYSQL_DATABASE: inventory_service_db
+#    volumes:
+#      - ./mysql-data:/var/lib/mysql
+#
+#  inventory-service:
+#    build:
+#      context: ./inventory-service
+#      dockerfile: Dockerfile
+#    container_name: inventory-service
+#    depends_on:
+#      - inventory-db
+#      - eureka-server
+#    environment:
+#      DB_URL: jdbc:mariadb://inventory-db:3306/inventory_service_db
+#      DB_USERNAME: root
+#      DB_PASSWORD: 12345
+#      PRODUCTION_BASE_URL: http://production-service:8081
+#    ports:
+#      - "8082:8082"
+#
+#  sales-db:
+#    image: mariadb:11
+#    container_name: sales-db
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 12345
+#      MYSQL_DATABASE: sales_service_db
+#    volumes:
+#      - ./mysql-data:/var/lib/mysql
+#
+#  sales-service:
+#    build:
+#      context: ./sales-service
+#      dockerfile: Dockerfile
+#    container_name: sales-service
+#    environment:
+#      DB_URL: jdbc:mariadb://sales-db:3306/sales_service_db
+#      DB_USERNAME: root
+#      DB_PASSWORD: 12345
+#    depends_on:
+#      - sales-db
+#      - eureka-server
+#    ports:
+#      - "8083:8083"

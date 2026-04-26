@@ -37,12 +37,6 @@ CREATE TABLE plant (
     -- HealthStatus
                        `condition` VARCHAR(20),
 
-    -- Disease (Embeddable)
-                       disease_name VARCHAR(255),
-
-    -- Treatment (Embeddable)
-                       treatment_description VARCHAR(500),
-
     -- ===== Conifer fields =====
                        plant_description VARCHAR(500),
                        propagation_type VARCHAR(100),
@@ -77,19 +71,44 @@ CREATE TABLE plant (
 -- OUTBOX EVENT (Outbox Pattern)
 -- =====================================================
 CREATE TABLE outbox_event (
-                              id BIGINT NOT NULL AUTO_INCREMENT,
+                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
-                              event_id VARCHAR(255) NOT NULL,
+                              event_id VARCHAR(36) NOT NULL,
+
                               aggregate_type VARCHAR(255) NOT NULL,
                               aggregate_id VARCHAR(255) NOT NULL,
                               event_type VARCHAR(255) NOT NULL,
 
                               payload LONGTEXT NOT NULL,
-                              status VARCHAR(50) NOT NULL,
 
-                              created_at DATETIME NOT NULL,
-                              sent_at DATETIME,
+                              status VARCHAR(20) NOT NULL,
 
-                              PRIMARY KEY (id),
-                              UNIQUE KEY uk_event_id (event_id)
+                              created_at DATETIME(6) NOT NULL,
+                              sent_at DATETIME(6) NULL,
+
+                              CONSTRAINT uq_outbox_event_event_id UNIQUE (event_id)
+);
+
+CREATE TABLE plant_diseases (
+                                plant_id BIGINT NOT NULL,
+                                name VARCHAR(255) NOT NULL,
+
+                                CONSTRAINT fk_plant_diseases_plant
+                                    FOREIGN KEY (plant_id)
+                                        REFERENCES plant(id)
+                                        ON DELETE CASCADE,
+
+                                CONSTRAINT uk_plant_disease UNIQUE (plant_id, name)
+) ENGINE=InnoDB;
+
+CREATE TABLE plant_treatments (
+                                  plant_id BIGINT NOT NULL,
+                                  description VARCHAR(255) NOT NULL,
+
+                                  CONSTRAINT fk_plant_treatments_plant
+                                      FOREIGN KEY (plant_id)
+                                          REFERENCES plant(id)
+                                          ON DELETE CASCADE,
+
+                                  CONSTRAINT uk_plant_treatment UNIQUE (plant_id, description)
 ) ENGINE=InnoDB;
