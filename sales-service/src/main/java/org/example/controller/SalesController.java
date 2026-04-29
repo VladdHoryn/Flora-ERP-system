@@ -7,6 +7,8 @@ import org.example.domain.order.Order;
 import org.example.domain.order.PlantOrder;
 import org.example.domain.user.User;
 import org.example.dto.CreateUserRequest;
+import org.example.dto.PlantOrderDto;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,8 +48,8 @@ public class SalesController {
     }
 
     @PostMapping("/orders")
-    public Order createOrder(@RequestParam Long userId) {
-        return service.createOrder(userId);
+    public Order createOrder(@RequestParam Long userId,@Validated @RequestBody List<PlantOrderDto> plantsOrder) {
+        return service.createOrder(userId, plantsOrder);
     }
 
     @PutMapping("/orders/{orderId}")

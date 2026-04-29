@@ -36,4 +36,8 @@ public class User {
             orphanRemoval = true
     )
     private List<Order> orders;
+
+    public void addOrder(Order order){
+        orders.add(order);
+    }
 }

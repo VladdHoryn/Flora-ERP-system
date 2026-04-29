@@ -8,6 +8,7 @@ import org.example.domain.order.OrderStatus;
 import org.example.domain.order.PlantOrder;
 import org.example.domain.user.User;
 import org.example.domain.user.UserRole;
+import org.example.dto.PlantOrderDto;
 import org.example.repository.OrderRepository;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -51,13 +52,26 @@ public class SalesApplicationService {
     // =========================
 
     @Transactional
-    public Order createOrder(Long userId) {
+    public Order createOrder(Long userId, List<PlantOrderDto> plantsOrder) {
         User user = getUser(userId);
 
         Order order = new Order();
         order.setUser(user);
 
+        for(var plant : plantsOrder){
+            PlantOrder plantOrder = new PlantOrder();
+
+            plantOrder.setPlantType(plant.getPlantType());
+            plantOrder.setPlantName(plant.getPlantName());
+            plantOrder.setPlantAge(plant.getPlantAge());
+            plantOrder.setQuantity(plant.getQuantity());
+
+            order.addPlantOrder(plantOrder);
+        }
+
         orderRepository.save(order);
+
+        user.addOrder(order);
 
         log.info("Order created: {} for user {}", order.getId(), userId);
         return order;
