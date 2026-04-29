@@ -100,6 +100,17 @@ services:
     ports:
       - "8083:8083"
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: always
+    container_name: api-gateway
+    depends_on:
+      - eureka-server
+    ports:
+      - "8085:8085"
+
 volumes:
   rabbitmq_data:
   production-db-data:

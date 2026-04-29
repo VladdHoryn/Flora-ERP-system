@@ -40,6 +40,11 @@ public class SalesController {
     // ORDER ENDPOINTS
     // =========================
 
+    @GetMapping("/orders/{id}")
+    public Order getOrderById(@PathVariable Long id){
+        return service.getOrder(id);
+    }
+
     @PostMapping("/orders")
     public Order createOrder(@RequestParam Long userId) {
         return service.createOrder(userId);

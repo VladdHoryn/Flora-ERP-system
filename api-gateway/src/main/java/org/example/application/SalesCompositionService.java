@@ -22,7 +22,7 @@ public class SalesCompositionService {
 
     public Mono<SalesDetailsResponse> getSalesDetails(Long salesId){
         Mono<SalesResponse> salesMono = webClient.get()
-                .uri(salesBaseUrl + "/sales/v1/users/{id}", salesId)
+                .uri(salesBaseUrl + "/sales/v1/orders/{id}", salesId)
                 .retrieve()
                 .bodyToMono(SalesResponse.class);
 
