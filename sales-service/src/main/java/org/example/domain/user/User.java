@@ -1,5 +1,6 @@
 package org.example.domain.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.example.domain.order.Order;
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,10 +32,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @JsonIgnore
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
+
+    public void addOrder(Order order){
+        orders.add(order);
+        order.setUser(this);
+    }
 }

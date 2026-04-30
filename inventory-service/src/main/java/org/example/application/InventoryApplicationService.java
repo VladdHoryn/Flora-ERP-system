@@ -128,6 +128,10 @@ public class InventoryApplicationService {
         return reservationRepository.findAll();
     }
 
+    public Reservation getReservationByUserId(Long userId){
+        return reservationRepository.findFirstByUserId(userId);
+    }
+
     @Transactional
     public Reservation createReservation(List<PlantData> plants, Long userId) {
 
