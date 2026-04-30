@@ -56,7 +56,6 @@ public class SalesApplicationService {
         User user = getUser(userId);
 
         Order order = new Order();
-        order.setUser(user);
 
         for(var plant : plantsOrder){
             PlantOrder plantOrder = new PlantOrder();
@@ -69,9 +68,9 @@ public class SalesApplicationService {
             order.addPlantOrder(plantOrder);
         }
 
-        orderRepository.save(order);
-
         user.addOrder(order);
+
+        orderRepository.save(order);
 
         log.info("Order created: {} for user {}", order.getId(), userId);
         return order;

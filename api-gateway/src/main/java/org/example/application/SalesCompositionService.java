@@ -28,12 +28,12 @@ public class SalesCompositionService {
 
         return salesMono.flatMap(salesResponse -> {
             Mono<ReservationResponse> reservationMono = webClient.get()
-                    .uri(inventoryBaseUrl + "/inventory/v1/{id}/user", salesResponse.getUserId())
+                    .uri(inventoryBaseUrl + "/inventory/v1/reservations/{id}/user", salesResponse.getUser().getId())
                     .retrieve()
                     .bodyToMono(ReservationResponse.class);
 
             return reservationMono.map(reservation -> SalesDetailsResponse.builder()
-                    .salesId(salesResponse.getSalesId())
+                    .salesId(salesResponse.getId())
                     .userId(reservation.getUserId())
                     .status(salesResponse.getStatus())
                     .reservation(reservation)

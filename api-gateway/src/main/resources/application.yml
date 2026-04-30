@@ -26,8 +26,6 @@ spring:
                 - Path=/sales/v1/**
 
 services:
-  production:
-    base-url: http://production-service:8081
   inventory:
     base-url: http://inventory-service:8082
   sales:
