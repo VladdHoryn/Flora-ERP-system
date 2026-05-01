@@ -47,3 +47,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka
+
+#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9:
+#  eyJzdWIiOiIxMjMiLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3MTAwMDAwMDAsImV4cCI6MTkxMDAwMDAwMH0:
+#    A4v9XGqOB5wXEyIzkwfQu22QVm4hIj-ZLkXFlwSg0KI:
