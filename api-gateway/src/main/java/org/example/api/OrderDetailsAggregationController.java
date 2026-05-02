@@ -12,10 +12,10 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class SalesAggregationController {
+public class OrderDetailsAggregationController {
     private final SalesCompositionService compositionService;
 
-    @GetMapping("/sales/{id}/details")
+    @GetMapping("/order-details/{id}")
     public Mono<SalesDetailsResponse> getSalesDetails(@PathVariable(name = "id") Long id){
         return compositionService.getSalesDetails(id);
     }
