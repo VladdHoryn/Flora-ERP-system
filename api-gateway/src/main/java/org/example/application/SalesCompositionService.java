@@ -16,16 +16,18 @@ import java.time.Duration;
 public class SalesCompositionService {
     private final WebClient webClient;
 
-    @Value("${services.sales.base-url}")
-    private String salesBaseUrl;
+    private final ServicesProperties servicesProperties;
 
-    @Value("${services.inventory.base-url}")
-    private String inventoryBaseUrl;
+//    @Value("${services.sales.base-url}")
+//    private String salesBaseUrl;
+//
+//    @Value("${services.inventory.base-url}")
+//    private String inventoryBaseUrl;
 
     public Mono<SalesDetailsResponse> getSalesDetails(Long salesId){
 
         Mono<SalesResponse> salesMono = webClient.get()
-                .uri(salesBaseUrl + "/sales/v1/orders/{id}", salesId)
+                .uri( servicesProperties.getSales().getBaseUrl() + "/sales/v1/orders/{id}", salesId)
                 .retrieve()
                 .bodyToMono(SalesResponse.class)
                 .onErrorResume(ex -> {
@@ -34,7 +36,7 @@ public class SalesCompositionService {
 
         return salesMono.flatMap(salesResponse -> {
             Mono<ReservationResponse> reservationMono = webClient.get()
-                    .uri(inventoryBaseUrl + "/inventory/v1/reservations/{id}/user", salesResponse.getUser().getId())
+                    .uri( servicesProperties.getInventory().getBaseUrl() + "/inventory/v1/reservations/{id}/user", salesResponse.getUser().getId())
                     .retrieve()
                     .bodyToMono(ReservationResponse.class)
                     .timeout(Duration.ofSeconds(2))
