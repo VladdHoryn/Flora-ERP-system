@@ -1,0 +1,12 @@
+services:
+  production:
+    base-url: http://stage-production-service:8081
+  inventory:
+    base-url: http://stage-inventory-service:8082
+  sales:
+    base-url: http://stage-sales-service:8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://stage-eureka-server:8761/eureka
