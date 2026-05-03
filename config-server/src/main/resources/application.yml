@@ -5,15 +5,38 @@ spring:
   application:
     name: config-server
   profiles:
-    active: native
+    include: ${CONFIG_SERVER_BACKEND:native}
+
   cloud:
     config:
       server:
         native:
-          search-locations: file:../${CONFIG_SEARCH_PATH:configuration}
+          search-locations:
+            - file:../${CONFIG_SEARCH_PATH:configuration}
+            - file:../${CONFIG_SEARCH_PATH:configuration}/{application}
+
+  rabbitmq:
+    username: guest
+    password: guest
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_REPO_URI}
+          search-paths:
+            - configuration
+            - configuration/{application}
+          default-label: ${CONFIG_LABEL:main}
+          clone-on-start: true
