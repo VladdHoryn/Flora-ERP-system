@@ -5,16 +5,23 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   config:
-    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
-  rabbitmq:
-    #    host: rabbitmq
-    #    port: 5672
-    username: guest
-    password: guest
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888},optional:vault://"
 
-  datasource:
-    password: ${DB_PASSWORD:12345}
-      #username: ${DB_USERNAME:root}
+  cloud:
+    vault:
+      uri: ${VAULT_URI:http://localhost:8200}
+      authentication: token
+      token: ${VAULT_TOKEN:dev-root-token}
+
+#  rabbitmq:
+#    #    host: rabbitmq
+#    #    port: 5672
+#    username: guest
+#    password: guest
+
+#  datasource:
+#    password: ${DB_PASSWORD:12345}
+#    #username: ${DB_USERNAME:root}
 
   #    url: ${DB_URL:jdbc:mariadb://production-db:3306/production_service_db}
 
