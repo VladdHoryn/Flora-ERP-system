@@ -2,6 +2,9 @@ spring:
   application:
     name: sales-service
 
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
 #  datasource:
 #    username: ${DB_USERNAME:root}
 #    password: ${DB_PASSWORD:12345}
