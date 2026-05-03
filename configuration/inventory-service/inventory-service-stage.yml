@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  rabbitmq:
+    host: stage-rabbitmq
+    port: 5672
+
+  datasource:
+    username: stage_user
+    password: stage_password
+    url: jdbc:mariadb://stage-inventory-db:3306/inventory_service_db
+
+  flyway:
+    url: jdbc:mariadb://stage-inventory-db:3306/inventory_service_db
+    user: stage_user
+    password: stage_password
+
+production-service:
+  base-url: http://stage-production-service:8081
+  production-path: http://stage-production-service:8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://stage-eureka-server:8761/eureka

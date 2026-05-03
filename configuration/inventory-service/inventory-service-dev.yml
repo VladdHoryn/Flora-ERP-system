@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   rabbitmq:
@@ -9,16 +9,16 @@ spring:
   datasource:
     username: root
     password: 12345
-    url: jdbc:mariadb://localhost:3306/production_service_db
+    url: jdbc:mariadb://localhost:3306/inventory_service_db
 
   flyway:
-    url: jdbc:mariadb://localhost:3306/production_service_db
+    url: jdbc:mariadb://localhost:3306/inventory_service_db
     user: root
     password: 12345
 
-inventory-service:
-  base-url: http://localhost:8082
-  inventory-path: http://localhost:8082
+production-service:
+  base-url: http://localhost:8081
+  production-path: http://localhost:8081
 
 eureka:
   client:
