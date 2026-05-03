@@ -3,6 +3,15 @@ spring:
     host: ${RABBITMQ_HOST:rabbitmq}
     port: 5672
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,refresh,busrefresh
+  endpoint:
+    health:
+      show-details: when-authorized
+
 logging:
   level:
     root: WARN

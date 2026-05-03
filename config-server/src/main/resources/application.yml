@@ -7,6 +7,12 @@ spring:
   profiles:
     include: ${CONFIG_SERVER_BACKEND:native}
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
   cloud:
     config:
       server:
@@ -15,15 +21,11 @@ spring:
             - file:../${CONFIG_SEARCH_PATH:configuration}
             - file:../${CONFIG_SEARCH_PATH:configuration}/{application}
 
-  rabbitmq:
-    username: guest
-    password: guest
-
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,busrefresh
 
 ---
 spring:
