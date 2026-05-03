@@ -3,9 +3,6 @@ package org.example.config;
 import io.github.bucket4j.Bucket;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -14,6 +11,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -22,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
-public class RateLimitFilter implements GlobalFilter, Ordered {
+public class RateLimitFilter implements WebFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
@@ -31,37 +30,46 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
         log.warn("RateLimitFilter INIT");
     }
 
-    private Bucket createBucket(String s) {
+    private Bucket createBucket(String key) {
         return Bucket.builder()
                 .addLimit(limit -> limit
-                        .capacity(10) // burst (максимум одразу)
-                        .refillGreedy(5, Duration.ofSeconds(1)) // 5 токенів/сек
+                        .capacity(10)
+                        .refillGreedy(5, Duration.ofSeconds(1))
                 )
                 .build();
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+
         log.error("FILTER WORKS!!!");
 
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .flatMap(authentication -> applyRateLimit(exchange, chain, authentication))
+                .flatMap(auth -> applyRateLimit(exchange, chain, auth))
                 .switchIfEmpty(applyRateLimit(exchange, chain, null));
     }
 
     private Mono<Void> applyRateLimit(ServerWebExchange exchange,
-                                      GatewayFilterChain chain,
+                                      WebFilterChain chain,
                                       Authentication authentication) {
 
+        String path = exchange.getRequest().getURI().getPath();
+
+        // 👉 застосовуємо тільки до твого endpoint
+        if (!path.startsWith("/api/v1/order-details")) {
+            return chain.filter(exchange);
+        }
+
         String key = resolveKey(exchange, authentication);
-//        System.out.println(key);
         Bucket bucket = buckets.computeIfAbsent(key, this::createBucket);
 
-        log.warn("Rate-limit key: {}", key);
-        log.warn("ALLOWED: {}", bucket.tryConsume(1));
+        boolean allowed = bucket.tryConsume(1);
 
-        if (bucket.tryConsume(1)) {
+        log.warn("Rate-limit key: {}", key);
+        log.warn("ALLOWED: {}", allowed);
+
+        if (allowed) {
             return chain.filter(exchange);
         }
 
@@ -82,7 +90,8 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
                         .wrap(body.getBytes())));
     }
 
-    private String resolveKey(ServerWebExchange exchange, Object authentication) {
+    private String resolveKey(ServerWebExchange exchange, Authentication authentication) {
+
         if (authentication instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
             return "user:" + jwt.getSubject();
@@ -94,10 +103,5 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
         }
 
         return "anonymous";
-    }
-
-    @Override
-    public int getOrder() {
-        return -1000;
     }
 }
