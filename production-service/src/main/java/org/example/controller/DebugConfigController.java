@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.infrastructure.config.InventoryServiceProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,13 +13,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DebugConfigController {
 
-    private final ProductionServiceProperties productionServiceProperties;
+    private final InventoryServiceProperties inventoryServiceProperties;
 
     @GetMapping
     public Map<String, String> currentConfig() {
         return Map.of(
-                "book-service.base-url", productionServiceProperties.getBaseUrl(),
-                "book-service.books-path", productionServiceProperties.getBooksPath()
+                "inventory-service.base-url", inventoryServiceProperties.getBaseUrl(),
+                "inventory-service.books-path", inventoryServiceProperties.getInventoryPath()
         );
     }
 }
