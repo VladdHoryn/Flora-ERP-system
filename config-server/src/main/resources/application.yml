@@ -8,18 +8,20 @@ spring:
     include: ${CONFIG_SERVER_BACKEND:native}
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
+    host: ${RABBITMQ_HOST:rabbitmq}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+
 
   cloud:
     config:
       server:
         native:
           search-locations:
-            - file:../${CONFIG_SEARCH_PATH:configuration}
-            - file:../${CONFIG_SEARCH_PATH:configuration}/{application}
+            - file:/config
+#            - file:../${CONFIG_SEARCH_PATH:configuration}
+#            - file:../${CONFIG_SEARCH_PATH:configuration}/{application}
 
 management:
   endpoints:
@@ -41,6 +43,6 @@ spring:
 #            - configuration
 #            - configuration/{application}
 #          default-label: ${CONFIG_LABEL:main}
-          default-label: ${SPRING_PROFILES_ACTIVE:dev}
+          default-label: main
           clone-on-start: true
           force-pull: true

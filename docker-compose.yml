@@ -37,12 +37,17 @@ services:
     container_name: production-service
     depends_on:
       - production-db
+      - config-server
       - eureka-server
     environment:
-      DB_URL: jdbc:mariadb://production-db:3306/production_service_db
-      DB_USERNAME: root
-      DB_PASSWORD: 12345
-      INVENTORY_BASE_URL: http://inventory-service:8082
+      CONFIG_SERVER_URL: http://config-server:8888
+      VAULT_URI: http://vault:8200
+      VAULT_TOKEN: dev-root-token
+      SPRING_PROFILES_ACTIVE: dev
+    #      DB_URL: jdbc:mariadb://production-db:3306/production_service_db
+    #      DB_USERNAME: root
+    #      DB_PASSWORD: 12345
+    #      INVENTORY_BASE_URL: http://inventory-service:8082
     ports:
       - "8081:8081"
 
@@ -65,6 +70,7 @@ services:
     container_name: inventory-service
     depends_on:
       - inventory-db
+      - config-server
       - eureka-server
     environment:
       DB_URL: jdbc:mariadb://inventory-db:3306/inventory_service_db
@@ -96,6 +102,7 @@ services:
       DB_PASSWORD: 12345
     depends_on:
       - sales-db
+      - config-server
       - eureka-server
     ports:
       - "8083:8083"
@@ -107,9 +114,23 @@ services:
     restart: always
     container_name: api-gateway
     depends_on:
+      - config-server
       - eureka-server
     ports:
       - "8085:8085"
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    restart: always
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    volumes:
+      - ./configuration:/config
 
   vault:
     image: hashicorp/vault:1.17
@@ -119,7 +140,7 @@ services:
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: dev-root-token
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_ADDR: http://vault:8200
     cap_add:
       - IPC_LOCK
     healthcheck:

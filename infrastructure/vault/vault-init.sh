@@ -1,19 +1,45 @@
 #!/bin/sh
 set -e
 
+export VAULT_ADDR=${VAULT_ADDR:-http://vault:8200}
+export VAULT_TOKEN=${VAULT_TOKEN:-dev-root-token}
+
 echo "Seed vault secrets"
 
-vault kv put secret/application \
+echo "🔐 Seeding Vault secrets..."
+
+# -------- GLOBAL (shared) --------
+vault kv put secret/application/dev \
   spring.rabbitmq.username=guest \
   spring.rabbitmq.password=guest
 
+vault kv put secret/application/prod \
+  spring.rabbitmq.username=guest \
+  spring.rabbitmq.password=guest
+
+# -------- PRODUCTION SERVICE --------
+vault kv put secret/production-service/dev \
+  spring.datasource.url=jdbc:mariadb://production-db:3306/production_service_db \
+  spring.datasource.username=root \
+  spring.datasource.password=12345
+
+vault kv put secret/production-service/prod \
+  spring.datasource.url=jdbc:mariadb://production-db:3306/production_service_db \
+  spring.datasource.username=root \
+  spring.datasource.password=12345
+
+# (optional fallback без profile)
 vault kv put secret/production-service \
+  spring.datasource.url=jdbc:mariadb://production-db:3306/production_service_db \
+  spring.datasource.username=root \
   spring.datasource.password=12345
 
-vault kv put secret/inventory-service \
+# -------- INVENTORY SERVICE --------
+vault kv put secret/inventory-service/dev \
   spring.datasource.password=12345
 
-vault kv put secret/sales-service \
+# -------- SALES SERVICE --------
+vault kv put secret/sales-service/dev \
   spring.datasource.password=12345
 
 vault kv put secret/api-gateway \
