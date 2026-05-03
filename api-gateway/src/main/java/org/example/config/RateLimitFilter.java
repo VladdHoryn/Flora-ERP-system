@@ -1,6 +1,8 @@
 package org.example.config;
 
 import io.github.bucket4j.Bucket;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -19,9 +21,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Slf4j
 public class RateLimitFilter implements GlobalFilter, Ordered {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init() {
+        log.warn("RateLimitFilter INIT");
+    }
 
     private Bucket createBucket(String s) {
         return Bucket.builder()
@@ -34,6 +42,7 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.error("FILTER WORKS!!!");
 
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
@@ -46,8 +55,11 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
                                       Authentication authentication) {
 
         String key = resolveKey(exchange, authentication);
-        System.out.println(key);
+//        System.out.println(key);
         Bucket bucket = buckets.computeIfAbsent(key, this::createBucket);
+
+        log.warn("Rate-limit key: {}", key);
+        log.warn("ALLOWED: {}", bucket.tryConsume(1));
 
         if (bucket.tryConsume(1)) {
             return chain.filter(exchange);
@@ -86,6 +98,6 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -10;
+        return -1000;
     }
 }
