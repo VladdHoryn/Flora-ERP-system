@@ -11,8 +11,11 @@ import java.time.Duration;
 
 @Configuration
 public class ClientConfig {
-    @Value("${production-service.base-url}")
-    private String productionUrl;
+
+    private ProductionServiceProperties productionServiceProperties;
+
+//    @Value("${production-service.base-url}")
+//    private String productionUrl;
 
     @Bean
     RestClient restClient(RestClient.Builder builder) {
@@ -24,7 +27,7 @@ public class ClientConfig {
         requestFactory.setReadTimeout(Duration.ofMillis(800));
 
         return builder
-                .baseUrl(productionUrl)
+                .baseUrl(productionServiceProperties.getBaseUrl())
                 .requestFactory(requestFactory)
                 .build();
     }
