@@ -1,0 +1,24 @@
+
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8085']
+
+  - job_name: 'sales-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['sales-service:8083']
+
+  - job_name: 'inventory-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['inventory-service:8082']
+
+  - job_name: 'production-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['production-service:8081']

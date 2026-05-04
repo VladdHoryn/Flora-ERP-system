@@ -111,6 +111,13 @@ services:
     ports:
       - "8085:8085"
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   rabbitmq_data:
   production-db-data:
