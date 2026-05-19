@@ -29,7 +29,6 @@ public class RateLimitFilter implements WebFilter {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final MeterRegistry meterRegistry;
 
-    // 🔥 METRICS
     private Counter allowedRequests;
     private Counter blockedRequests;
     private Counter totalRequests;
