@@ -23,8 +23,10 @@ import java.util.List;
 public class ProductionServiceClient {
     private final RestClient restClient;
 
-    @Value("${production-service.production-path}")
-    private String productionUrl;
+    private final ProductionServiceProperties productionServiceProperties;
+
+//    @Value("${production-service.production-path}")
+//    private String productionUrl;
 
     @Retry(name = "productionService", fallbackMethod = "findHealthyFallback")
     @CircuitBreaker(name = "productionService", fallbackMethod = "findHealthyFallback")
@@ -39,7 +41,7 @@ public class ProductionServiceClient {
 
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(productionUrl + "/plants/healthy")
+                        .path(productionServiceProperties.getProductionPath() + "/plants/healthy")
                         .queryParam("plantType", plantType)
                         .queryParam("plantName", plantName)
                         .queryParam("plantAge", plantAge)
@@ -54,7 +56,7 @@ public class ProductionServiceClient {
         log.info("CALLING production-service...");
 
         return restClient.get()
-                .uri(productionUrl + "/production/v1/plants/changes?since=" + since)
+                .uri( productionServiceProperties.getProductionPath() + "/production/v1/plants/changes?since=" + since)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<PlantChangeDTO>>() {});
     }

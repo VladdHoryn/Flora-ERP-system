@@ -11,6 +11,5 @@ import org.springframework.web.client.RestClient;
 public class InventoryServiceClient {
     private final RestClient restClient;
 
-    @Value("${inventory-service.inventory-path}")
-    private String inventoryPath;
+    private final InventoryServiceProperties inventoryServiceProperties;
 }

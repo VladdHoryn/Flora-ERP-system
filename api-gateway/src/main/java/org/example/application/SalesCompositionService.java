@@ -20,32 +20,29 @@ public class SalesCompositionService {
     private final WebClient webClient;
     private final MeterRegistry meterRegistry;
 
-    @Value("${services.sales.base-url}")
-    private String salesBaseUrl;
+    private final ServicesProperties servicesProperties;
 
-    @Value("${services.inventory.base-url}")
-    private String inventoryBaseUrl;
+//    @Value("${services.sales.base-url}")
+//    private String salesBaseUrl;
+//
+//    @Value("${services.inventory.base-url}")
+//    private String inventoryBaseUrl;
 
     private Counter successCounter;
     private Counter errorCounter;
     private Timer latencyTimer;
 
-    @jakarta.annotation.PostConstruct
-    public void initMetrics() {
-        successCounter = meterRegistry.counter("sales.requests.success");
-        errorCounter = meterRegistry.counter("sales.requests.errors");
+        Mono<SalesResponse> salesMono = webClient.get()
+                .uri( servicesProperties.getSales().getBaseUrl() + "/sales/v1/orders/{id}", salesId)
+                .retrieve()
+                .bodyToMono(SalesResponse.class)
+                .onErrorResume(ex -> {
+                    return Mono.empty();
+                });
 
-        latencyTimer = meterRegistry.timer("sales.requests.latency");
-    }
-
-    public Mono<SalesDetailsResponse> getSalesDetails(Long salesId) {
-
-        return Mono.defer(() -> {
-
-            Timer.Sample sample = Timer.start(meterRegistry);
-
-            Mono<SalesResponse> salesMono = webClient.get()
-                    .uri(salesBaseUrl + "/sales/v1/orders/{id}", salesId)
+        return salesMono.flatMap(salesResponse -> {
+            Mono<ReservationResponse> reservationMono = webClient.get()
+                    .uri( servicesProperties.getInventory().getBaseUrl() + "/inventory/v1/reservations/{id}/user", salesResponse.getUser().getId())
                     .retrieve()
                     .bodyToMono(SalesResponse.class)
                     .onErrorResume(ex -> {

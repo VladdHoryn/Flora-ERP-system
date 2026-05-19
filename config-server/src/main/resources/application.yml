@@ -1,0 +1,48 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    include: ${CONFIG_SERVER_BACKEND:native}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations:
+            - file:/config
+#            - file:../${CONFIG_SEARCH_PATH:configuration}
+#            - file:../${CONFIG_SEARCH_PATH:configuration}/{application}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,busrefresh
+
+---
+spring:
+  config:
+    activate:
+      on-profile: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_REPO_URI}
+#          search-paths:
+#            - configuration
+#            - configuration/{application}
+#          default-label: ${CONFIG_LABEL:main}
+          default-label: main
+          clone-on-start: true
+          force-pull: true

@@ -1,0 +1,18 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    username: stage_user
+    password: stage_password
+    url: jdbc:mariadb://stage-sales-db:3306/sales_service_db
+
+  flyway:
+    url: jdbc:mariadb://stage-sales-db:3306/sales_service_db
+    user: stage_user
+    password: stage_password
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://stage-eureka-server:8761/eureka

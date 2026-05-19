@@ -1,0 +1,12 @@
+services:
+  production:
+    base-url: http://production-service:8081
+  inventory:
+    base-url: http://inventory-service:8082
+  sales:
+    base-url: http://sales-service:8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

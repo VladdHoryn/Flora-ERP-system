@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+
+  datasource:
+    username: root
+    password: 12345
+    url: jdbc:mariadb://localhost:3306/inventory_service_db
+
+  flyway:
+    url: jdbc:mariadb://localhost:3306/inventory_service_db
+    user: root
+    password: 12345
+
+production-service:
+  base-url: http://localhost:8081
+  production-path: http://localhost:8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

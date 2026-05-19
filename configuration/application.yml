@@ -1,0 +1,17 @@
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+#  rabbitmq:
+#    host: localhost
+#    port: 5672
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%X{correlationId}] %logger{36} : %msg%n"

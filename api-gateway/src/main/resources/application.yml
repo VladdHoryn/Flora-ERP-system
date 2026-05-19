@@ -5,54 +5,72 @@ spring:
   application:
     name: api-gateway
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret-key: my-secret-key-which-should-be-veeeeeeery-long
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888},optional:vault://"
 
   cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: production-service
-              uri: http://production-service:8081
-              predicates:
-                - Path=/production/v1/**
+    vault:
+      uri: ${VAULT_URI:http://localhost:8200}
+      authentication: token
+      token: ${VAULT_TOKEN:dev-root-token}
 
-            - id: inventory-service
-              uri: http://inventory-service:8082
-              predicates:
-                - Path=/inventory/v1/**
+#  cloud:
+#    vault:
+#      uri: ${VAULT_URI}
+#      authentication: approle
+#      app-role:
+#        role-id: ${VAULT_ROLE_ID}
+#        secret-id: ${VAULT_SECRET_ID}
+#        app-role-path: approle
+#      ssl:
+#        trust-store: classpath:vault-truststore.jks
+#        trust-store-password: ${VAULT_TRUSTSTORE_PASSWORD}
 
-            - id: sales-service
-              uri: http://sales-service:8083
-              predicates:
-                - Path=/sales/v1/**
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          secret-key: my-secret-key-which-should-be-veeeeeeery-long
 
-services:
-  inventory:
-    base-url: http://inventory-service:8082
-  sales:
-    base-url: http://sales-service:8083
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,gateway,prometheus
-  endpoint:
-    prometheus:
-      enabled: true
-  metrics:
-    tags:
-      application: api-gateway
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka
+#  cloud:
+#    gateway:
+#      server:
+#        webflux:
+#          routes:
+#            - id: production-service
+#              uri: http://production-service:8081
+#              predicates:
+#                - Path=/production/v1/**
+#
+#            - id: inventory-service
+#              uri: http://inventory-service:8082
+#              predicates:
+#                - Path=/inventory/v1/**
+#
+#            - id: sales-service
+#              uri: http://sales-service:8083
+#              predicates:
+#                - Path=/sales/v1/**
+#
+#services:
+#  inventory:
+#    base-url: http://inventory-service:8082
+#  sales:
+#    base-url: http://sales-service:8083
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,gateway
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://eureka-server:8761/eureka
 
 #eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9:
 #  eyJzdWIiOiIxMjMiLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3MTAwMDAwMDAsImV4cCI6MTkxMDAwMDAwMH0:

@@ -1,0 +1,19 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  #    username: ${RABBIT_USERNAME}
+  #    password: ${RABBIT_PASSWORD}
+
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL:}
+
+inventory-service:
+  base-url: ${INVENTORY_BASE_URL:http://inventory-service:8082}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eurekafgh
