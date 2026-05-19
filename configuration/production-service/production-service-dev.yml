@@ -7,6 +7,11 @@ spring:
     password: 12345
     url: jdbc:mariadb://localhost:3306/production_service_db
 
+  flyway:
+    url: jdbc:mariadb://localhost:3306/inventory_service_db
+    user: root
+    password: 12345
+
 inventory-service:
   base-url: http://localhost:8082
 
