@@ -59,8 +59,8 @@ public class InventoryController {
     @GetMapping("/reservations/{id}/user")
     public Reservation getReservationByUserId(@RequestHeader("X-User-Id") String userId,
                                               @RequestHeader("X-Roles") String roles,
-                                              @PathVariable Long Id){
-        return inventoryApplicationService.getReservationByUserId(Id);
+                                              @PathVariable Long id){
+        return inventoryApplicationService.getReservationByUserId(id);
     }
 
     @PostMapping("/reservations")

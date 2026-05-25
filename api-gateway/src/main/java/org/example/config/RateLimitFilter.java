@@ -14,6 +14,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 import java.time.Duration;
 import java.util.Map;
@@ -24,10 +27,27 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter implements WebFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final MeterRegistry meterRegistry;
+
+    // 🔥 METRICS
+    private Counter allowedRequests;
+    private Counter blockedRequests;
+    private Counter totalRequests;
+    private Timer latencyTimer;
+
+    public RateLimitFilter(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
 
     @PostConstruct
     public void init() {
         log.warn("RateLimitFilter INIT");
+
+        allowedRequests = meterRegistry.counter("rate_limit.requests.allowed");
+        blockedRequests = meterRegistry.counter("rate_limit.requests.blocked");
+        totalRequests = meterRegistry.counter("rate_limit.requests.total");
+
+        latencyTimer = meterRegistry.timer("rate_limit.filter.latency");
     }
 
     private Bucket createBucket(String key) {
@@ -42,12 +62,18 @@ public class RateLimitFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        log.error("FILTER WORKS!!!");
+        return Mono.defer(() -> {
 
-        return ReactiveSecurityContextHolder.getContext()
-                .map(SecurityContext::getAuthentication)
-                .flatMap(auth -> applyRateLimit(exchange, chain, auth))
-                .switchIfEmpty(applyRateLimit(exchange, chain, null));
+            Timer.Sample sample = Timer.start(meterRegistry);
+
+            totalRequests.increment(); // 📊 throughput
+
+            return ReactiveSecurityContextHolder.getContext()
+                    .map(SecurityContext::getAuthentication)
+                    .flatMap(auth -> applyRateLimit(exchange, chain, auth))
+                    .switchIfEmpty(applyRateLimit(exchange, chain, null))
+                    .doOnTerminate(() -> sample.stop(latencyTimer)); // ⏱ latency
+        });
     }
 
     private Mono<Void> applyRateLimit(ServerWebExchange exchange,
@@ -56,7 +82,7 @@ public class RateLimitFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // 👉 застосовуємо тільки до твого endpoint
+        // тільки для потрібного endpoint
         if (!path.startsWith("/api/v1/order-details")) {
             return chain.filter(exchange);
         }
@@ -70,8 +96,11 @@ public class RateLimitFilter implements WebFilter {
         log.warn("ALLOWED: {}", allowed);
 
         if (allowed) {
+            allowedRequests.increment(); // ✅ allowed
             return chain.filter(exchange);
         }
+
+        blockedRequests.increment(); // ❌ blocked
 
         exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
