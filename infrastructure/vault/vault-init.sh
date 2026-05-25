@@ -8,6 +8,8 @@ echo "Seed vault secrets"
 
 echo "🔐 Seeding Vault secrets..."
 
+vault secrets list | grep "secret/" || vault secrets enable -path=secret kv-v2
+
 # -------- GLOBAL (shared) --------
 vault kv put secret/application/dev \
   spring.rabbitmq.username=guest \
