@@ -1,5 +1,6 @@
 package org.example.infrastructure.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,9 +11,10 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 
 @Configuration
+@RequiredArgsConstructor
 public class ClientConfig {
 
-    private ProductionServiceProperties productionServiceProperties;
+    private final ProductionServiceProperties productionServiceProperties;
 
 //    @Value("${production-service.base-url}")
 //    private String productionUrl;

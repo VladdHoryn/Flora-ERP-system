@@ -38,7 +38,18 @@ vault kv put secret/production-service \
 
 # -------- INVENTORY SERVICE --------
 vault kv put secret/inventory-service/dev \
-  spring.datasource.password=12345
+  spring.datasource.url=jdbc:mariadb://inventory-db:3306/inventory_service_db \
+      spring.datasource.username=root \
+      spring.datasource.password=12345 \
+      spring.rabbitmq.username=guest \
+      spring.rabbitmq.password=guest
+
+vault kv put secret/inventory-service/prod \
+    spring.datasource.url=jdbc:mariadb://inventory-db:3306/inventory_service_db \
+    spring.datasource.username=root \
+    spring.datasource.password=12345 \
+    spring.rabbitmq.username=guest \
+    spring.rabbitmq.password=guest
 
 # -------- SALES SERVICE --------
 vault kv put secret/sales-service/dev \
